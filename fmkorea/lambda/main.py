@@ -121,7 +121,14 @@ def lambda_handler(event, context):
     #     comments_parsed.extend(comments)
     #     time.sleep(5)
     url = post_link.get_attribute("href")
-    response = requests.get(url)
+    response = requests.get(url, headers={
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36',
+        "accept":
+            "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
+        "accept-encoding": "gzip, deflate, br, zstd",
+        "accept-language": "ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7",
+        "cache-control": "no-cache"
+    })
     print(response.text)
     post, comments = parse_post_detail(BeautifulSoup(response.text, 'html.parser'), url)
     posts_parsed.append(post)
