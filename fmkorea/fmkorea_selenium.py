@@ -4,11 +4,16 @@ from selenium import webdriver
 from selenium.webdriver import Keys
 from selenium.webdriver.common.by import By
 from urllib.parse import urlparse
+from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.chrome.options import Options
+from webdriver_manager.chrome import ChromeDriverManager
 import pandas as pd
 import time
 import csv
 import traceback
 import os
+import re
 
 
 def merge_csv(folder_name):
@@ -60,9 +65,12 @@ def parse_post_detail(bs: BeautifulSoup, current_url: str):
     title = bs.find('span', class_='np_18px_span').text.strip()
     content = []
 
+
+    def replace_multiple_spaces(text):
+        return re.sub(r'\s+', ' ', text).strip()
     article = bs.find('div', class_='xe_content')
     # 주석 제거
-    for comment in article.find_all(text=lambda text: isinstance(text, Comment)):
+    for comment in article.find_all(string=lambda text: isinstance(text, Comment)):
         comment.extract()
     # article 태그 직접 자식 노드들의 텍스트 처리
     for child in article.children:
@@ -99,7 +107,7 @@ def parse_post_detail(bs: BeautifulSoup, current_url: str):
     post = {
         "id": post_id,
         "title": title,
-        "content": ' \n'.join(content).replace('\r\n', ' ').replace('\n', ' '),
+        "content": replace_multiple_spaces(' \n'.join(content).replace('\r\n', ' ').replace('\n', ' ')),
         "likes": likes,
         "url": current_url,
         "author": author,
@@ -115,13 +123,22 @@ if __name__ == '__main__':
     page = 96
     start_date = datetime(2024, 6, 29)
     end_date = datetime(2024, 7, 29)
-    # Chrome 브라우저를 실행합니다.
-    driver = webdriver.Chrome()
-    # Google 홈페이지를 엽니다.
+    # Chrome 옵션 설정
+    chrome_options = Options()
+    chrome_options.add_argument("--headless")
+    chrome_options.add_argument("--disable-gpu")
+    chrome_options.add_argument("--no-sandbox")
+    chrome_options.add_argument("--disable-dev-shm-usage")
+
+    # Chrome 드라이버 생성
+    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
+
     driver.get(
         url=f"https://www.fmkorea.com/search.php?act=IS&is_keyword={keyword}&mid=home&where=document&page={page}&search_target=title"
     )
     time.sleep(3)
+
+
     while page <= 1000:
         try:
             print(f"parsing page {page}")
@@ -133,7 +150,6 @@ if __name__ == '__main__':
             comments_parsed = []
             for index, (post, post_link) in enumerate(zip(posts, post_links)):
                 if not post_link or not post:
-                    print(f"post link not found for {post.find("a").text}")
                     continue
                 timestamp_str = post.find("span", attrs={"class": "time"}).text
                 timestamp_datetime = datetime.strptime(timestamp_str, "%Y-%m-%d %H:%M")
