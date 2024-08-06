@@ -4,9 +4,33 @@ from selenium import webdriver
 from selenium.webdriver import Keys
 from selenium.webdriver.common.by import By
 from urllib.parse import urlparse
+import pandas as pd
 import time
 import csv
 import traceback
+import os
+
+
+def merge_csv(folder_name):
+    # CSV 파일들이 있는 폴더 경로를 지정합니다.
+    folder_path = f'./raw/{folder_name}'
+
+    # 폴더 내의 모든 CSV 파일 리스트를 가져옵니다.
+    csv_files = [file for file in os.listdir(folder_path) if file.endswith('.csv')]
+
+    # 빈 리스트를 생성하여 모든 DataFrame을 저장합니다.
+    dataframes = []
+
+    # 각 CSV 파일을 읽어서 리스트에 추가합니다.
+    for file in csv_files:
+        file_path = os.path.join(folder_path, file)
+        df = pd.read_csv(file_path)
+        dataframes.append(df)
+
+    # 모든 DataFrame을 하나로 합칩니다.
+    combined_df = pd.concat(dataframes, ignore_index=True)
+
+    combined_df.to_csv(f"./{folder_name}.csv", index=False, encoding='utf-8-sig')
 
 
 def save_as_csv(posts, comments, page):
