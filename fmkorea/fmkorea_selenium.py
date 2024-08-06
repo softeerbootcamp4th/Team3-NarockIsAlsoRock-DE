@@ -137,8 +137,6 @@ if __name__ == '__main__':
         url=f"https://www.fmkorea.com/search.php?act=IS&is_keyword={keyword}&mid=home&where=document&page={page}&search_target=title"
     )
     time.sleep(3)
-
-
     while page <= 1000:
         try:
             print(f"parsing page {page}")
