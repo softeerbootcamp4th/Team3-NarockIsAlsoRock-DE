@@ -1,4 +1,4 @@
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, Comment
 from datetime import datetime
 from selenium import webdriver
 from selenium.webdriver import Keys
@@ -59,7 +59,16 @@ def parse_post_detail(bs: BeautifulSoup, current_url: str):
     post_id = parsed_url.path.split('/')[-1]
     title = bs.find('span', class_='np_18px_span').text.strip()
     content = []
-    for element in bs.find('div', class_='xe_content').find_all():
+
+    article = bs.find('div', class_='xe_content')
+    # 주석 제거
+    for comment in article.find_all(text=lambda text: isinstance(text, Comment)):
+        comment.extract()
+    # article 태그 직접 자식 노드들의 텍스트 처리
+    for child in article.children:
+        if isinstance(child, str) and child.strip():
+            content.append(child.strip())
+    for element in article.find_all():
         # img 또는 video 태그가 포함된 경우
         if element.name in ['img', 'video']:
             # img 또는 video 태그의 src 속성 추출
@@ -102,10 +111,10 @@ def parse_post_detail(bs: BeautifulSoup, current_url: str):
 
 
 if __name__ == '__main__':
-    keyword = '르노'
-    page = 95
-    start_date = datetime(2024, 6, 20)
-    end_date = datetime(2024, 7, 20)
+    keyword = '홍명보'
+    page = 96
+    start_date = datetime(2024, 6, 29)
+    end_date = datetime(2024, 7, 29)
     # Chrome 브라우저를 실행합니다.
     driver = webdriver.Chrome()
     # Google 홈페이지를 엽니다.
