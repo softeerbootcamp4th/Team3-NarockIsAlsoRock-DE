@@ -1,19 +1,8 @@
-from selenium import webdriver
+from selenium.webdriver.chrome.webdriver import WebDriver
 from selenium.webdriver.common.by import By
 from datetime import datetime
-from selenium.webdriver.chrome.options import Options
-from tempfile import mkdtemp
-from selenium.webdriver.chrome.service import Service
-
-import boto3
 import time
 import re
-
-
-def save_to_s3(bucket_name, file_name, data):
-    s3 = boto3.client('s3')
-    csv_data = "\n".join([",".join(map(str, row.values())) for row in data])
-    s3.put_object(Bucket=bucket_name, Key=file_name, Body=csv_data)
 
 
 def search_board_crawling(driver):
@@ -116,36 +105,12 @@ def per_post_crawling(driver):
     return content, like_cnt, view_cnt, cmt_authors, cmt_contents, cmt_post_ids, cmt_created_ats, cmt_updated_ats, cmt_cnt, post_id, updated_at
 
 
-def setup_driver():
-    chrome_options = Options()
-    chrome_options.binary_location = "/opt/chrome/chrome-linux64/chrome"
-    chrome_options.add_argument("--headless=new")
-    chrome_options.add_argument("--no-sandbox")
-    chrome_options.add_argument("--disable-dev-shm-usage")
-    chrome_options.add_argument("--disable-gpu")
-    chrome_options.add_argument("--disable-dev-tools")
-    chrome_options.add_argument("--no-zygote")
-    chrome_options.add_argument("--single-process")
-    chrome_options.add_argument(f"--user-data-dir={mkdtemp()}")
-    chrome_options.add_argument(f"--data-path={mkdtemp()}")
-    chrome_options.add_argument(f"--disk-cache-dir={mkdtemp()}")
-    chrome_options.add_argument("--remote-debugging-pipe")
-    chrome_options.add_argument("--verbose")
-    chrome_options.add_argument("--log-path=/tmp")
-
-    service = Service(executable_path="/opt/chrome-driver/chromedriver-linux64/chromedriver",
-                      service_log_path="/tmp/chromedriver.log")
-    return webdriver.Chrome(service=service, options=chrome_options)
-
-
-def lambda_handler(event, context):
+def main(event, context, driver: WebDriver):
     keyword = event.get('keyword', '')
     page = event.get('page', 1)
     datetime_start = datetime.strptime(event.get('start_date', '2024-06-29'), '%Y-%m-%d')
     datetime_end = datetime.strptime(event.get('end_date', '2024-07-29'), '%Y-%m-%d')
-    bucket_name = event.get('bucket_name')
 
-    driver = setup_driver()
     driver.get(f'https://www.clien.net/service/search?q={keyword}&sort=recency&p={page}&boardCd=&isBoard=false')
     time.sleep(2)
 
@@ -166,8 +131,9 @@ def lambda_handler(event, context):
     _cmt_authors = []
     _cmt_created_ats = []
     _cmt_updated_ats = []
+
     for title, post_url, created_at, author in zip(titles, urls, created_ats, authors):
-        if not datetime_start <= created_at <= datetime_end:
+        if not datetime_start <= datetime.strptime(created_at, '%Y-%m-%d %H:%M:%S') <= datetime_end:
             continue
         driver.get(post_url)
         time.sleep(2)
@@ -196,7 +162,7 @@ def lambda_handler(event, context):
 
     # 변환 작업
     _posts = []
-    for i in range(len(post_ids)):
+    for i in range(len(posts["id"])):
         _posts.append({
             "id": posts["id"][i],
             "title": posts["title"][i],
@@ -210,7 +176,7 @@ def lambda_handler(event, context):
         })
     # 변환 작업
     _comments = []
-    for i in range(len(comments)):
+    for i in range(len(comments["post_id"])):
         _comments.append({
             "post_id": comments["post_id"][i],
             "cmt_content": comments["cmt_content"][i],
@@ -219,11 +185,7 @@ def lambda_handler(event, context):
             "cmt_updated_at": comments["cmt_updated_at"][i],
         })
 
-    # S3에 저장
-    save_to_s3(bucket_name, f"{keyword}/posts/posts_{keyword}_page_{page}.csv", _posts)
-    save_to_s3(bucket_name, f"{keyword}/comments/comments_{keyword}_page_{page}.csv", _comments)
-
     return {
-        "posts": posts,
-        "comments": comments
+        "posts": _posts,
+        "comments": _comments
     }
