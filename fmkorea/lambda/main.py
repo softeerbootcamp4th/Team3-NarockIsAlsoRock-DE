@@ -116,7 +116,7 @@ def lambda_handler(event, context):
 
     driver = setup_driver()
     driver.get(
-        f"https://www.fmkorea.com/search.php?act=IS&is_keyword={keyword}&mid=home&where=document&page={page}&search_target=title")
+        f"https://www.fmkorea.com/search.php?act=IS&is_keyword={keyword}&mid=home&where=document&page={page}&search_target=title_content")
     time.sleep(3)
 
     bs = BeautifulSoup(driver.page_source, 'html.parser')
