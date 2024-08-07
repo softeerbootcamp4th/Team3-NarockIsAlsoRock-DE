@@ -14,4 +14,4 @@ RUN pip install selenium beautifulsoup4
 # Copy the main application code
 COPY main.py ./
 # Command to run the Lambda function
-CMD [ "tail -f /dev/null" ]
+CMD [ "main.lambda_handler" ]
