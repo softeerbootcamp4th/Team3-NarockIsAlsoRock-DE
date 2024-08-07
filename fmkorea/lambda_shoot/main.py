@@ -26,7 +26,7 @@ if __name__ == '__main__':
             "bucket_name": "fmkore-scraping-lambda"
         } for i in range(1, 29)
     ]
-    for param in parameters:
+    for index, param in enumerate(parameters):
         invoke_lambda_function(function_name, param)
         # 응답 출력 (비동기 호출이므로 결과는 없음)
-        print("Lambda function invoked asynchronously.")
+        print(f"Lambda function {index} invoked asynchronously.")
