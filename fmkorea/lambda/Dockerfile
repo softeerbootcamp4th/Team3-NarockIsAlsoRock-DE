@@ -10,8 +10,8 @@ RUN chmod +x ./chrome-installer.sh
 RUN ./chrome-installer.sh
 RUN rm ./chrome-installer.sh
 # Install selenium
-RUN pip install selenium beautifulsoup4 requests
+RUN pip install selenium beautifulsoup4
 # Copy the main application code
 COPY main.py ./
 # Command to run the Lambda function
-CMD [ "main.lambda_handler" ]
+CMD [ "tail -f /dev/null" ]

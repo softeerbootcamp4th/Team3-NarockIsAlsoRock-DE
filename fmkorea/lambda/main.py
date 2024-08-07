@@ -1,13 +1,13 @@
 from datetime import datetime
 from bs4 import BeautifulSoup, Comment
 from selenium import webdriver
+from selenium.webdriver import Keys
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from urllib.parse import urlparse
 import time
 import re
-import requests
 from tempfile import mkdtemp
 
 
@@ -73,10 +73,11 @@ def parse_post_detail(bs: BeautifulSoup, current_url: str):
 
 
 def lambda_handler(event, context):
-    keyword = '홍명보'
-    page = 96
-    start_date = datetime(2024, 6, 29)
-    end_date = datetime(2024, 7, 29)
+    # event에서 파라미터를 가져옵니다.
+    keyword = event.get('keyword', '')
+    page = event.get('page', 1)
+    start_date = datetime.strptime(event.get('start_date', '2024-06-29'), '%Y-%m-%d')
+    end_date = datetime.strptime(event.get('end_date', '2024-07-29'), '%Y-%m-%d')
 
     # Chrome 옵션 설정
     chrome_options = Options()
@@ -112,28 +113,31 @@ def lambda_handler(event, context):
     post_links = driver.find_elements(By.CSS_SELECTOR, "ul.searchResult li dl dt a")
     posts_parsed = []
     comments_parsed = []
-    post_link = post_links[0]
-    # for post_link in post_links:
-    #     url = post_link.get_attribute("href")
-    #     post, comments = parse_post_detail(BeautifulSoup(requests.get(url).content, 'html.parser'),
-    #                                        url)
-    #     posts_parsed.append(post)
-    #     comments_parsed.extend(comments)
-    #     time.sleep(5)
-    url = post_link.get_attribute("href")
-    response = requests.get(url, headers={
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36',
-        "accept":
-            "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
-        "accept-encoding": "gzip, deflate, br, zstd",
-        "accept-language": "ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7",
-        "cache-control": "no-cache"
-    })
-    print(response.text)
-    post, comments = parse_post_detail(BeautifulSoup(response.text, 'html.parser'), url)
-    posts_parsed.append(post)
-    comments_parsed.extend(comments)
-    print(post)
+    for index, (post, post_link) in enumerate(zip(posts, post_links)):
+        if not post_link or not post:
+            continue
+        timestamp_str = post.find("span", attrs={"class": "time"}).text
+        timestamp_datetime = datetime.strptime(timestamp_str, "%Y-%m-%d %H:%M")
+        if not start_date <= timestamp_datetime <= end_date:
+            print(f"date not desired {timestamp_datetime}")
+            continue
+        # Windows/Linux에서는 Ctrl + Enter, macOS에서는 Command + Enter
+        post_link.send_keys(Keys.CONTROL + Keys.RETURN)
+        time.sleep(2)  # 페이지가 로드될 때까지 대기
+        # 모든 탭 핸들 가져오기
+        tabs = driver.window_handles
+        # 새 탭으로 전환 (예: 두 번째 탭으로 전환)
+        new_tab = tabs[1]
+        driver.switch_to.window(new_tab)
+        time.sleep(2)
+        # 페이지 로딩을 위해 잠시 대기합니다.
+        post, comments = parse_post_detail(BeautifulSoup(driver.page_source, 'html.parser'), driver.current_url)
+        posts_parsed.append(post)
+        comments_parsed.extend(comments)
+        driver.close()
+        # 원래 탭으로 돌아가기
+        original_tab = tabs[0]
+        driver.switch_to.window(original_tab)
     return {
         "posts": posts_parsed,
         "comments": comments_parsed
