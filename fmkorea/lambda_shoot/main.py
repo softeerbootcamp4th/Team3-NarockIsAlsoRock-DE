@@ -30,3 +30,4 @@ if __name__ == '__main__':
         invoke_lambda_function(function_name, param)
         # 응답 출력 (비동기 호출이므로 결과는 없음)
         print(f"Lambda function {index} invoked asynchronously.")
+

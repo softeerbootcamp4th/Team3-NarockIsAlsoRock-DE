@@ -1,5 +1,3 @@
-import csv
-import boto3
 from datetime import datetime
 from bs4 import BeautifulSoup, Comment
 from selenium import webdriver
@@ -8,9 +6,11 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from urllib.parse import urlparse
+from tempfile import mkdtemp
+
+import boto3
 import time
 import re
-from tempfile import mkdtemp
 
 
 def save_to_s3(bucket_name, file_name, data):
