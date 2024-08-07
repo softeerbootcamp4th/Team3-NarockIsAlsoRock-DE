@@ -18,7 +18,7 @@ import re
 
 def merge_csv(folder_name):
     # CSV 파일들이 있는 폴더 경로를 지정합니다.
-    folder_path = f'./raw/{folder_name}'
+    folder_path = f'./raw/{keyword}                                                                                                                                                                                                                     /{folder_name}'
 
     # 폴더 내의 모든 CSV 파일 리스트를 가져옵니다.
     csv_files = [file for file in os.listdir(folder_path) if file.endswith('.csv')]
@@ -120,7 +120,7 @@ def parse_post_detail(bs: BeautifulSoup, current_url: str):
 
 if __name__ == '__main__':
     keyword = '홍명보'
-    page = 96
+    page = 370
     start_date = datetime(2024, 6, 29)
     end_date = datetime(2024, 7, 29)
     # Chrome 옵션 설정
