@@ -1,8 +1,46 @@
+import logging
 from tempfile import mkdtemp
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 import boto3
+
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
+
+
+def lambda_handler(event, context):
+    site = event.get('site', 'fmkorea')
+    keyword = event.get('keyword', '')
+    page = event.get('page', 1)
+    logger.info(f"scraping start site: {site}, page: {page}, keyword: {keyword} ")
+    try:
+        result = method_name(context, event, site)
+        save_result(keyword, page, result, site)
+    except Exception as e:
+        logger.error(f"error site: {site}, page: {page}, keyword: {keyword}")
+        logger.error(str(e))
+        raise
+
+
+def method_name(context, event, site):
+    result = {}
+    if site == "clien":
+        from sites import clien
+        result = clien.main(event, context, setup_driver())
+    elif site == "fmkorea":
+        from sites import fmkorea
+        result = fmkorea.main(event, context, setup_driver())
+    return result
+
+
+def save_result(keyword, page, result, site):
+    # S3에 저장
+    for key, value in result.items():
+        if len(value) == 0:
+            continue
+        save_to_s3("de3-web-scraping", f"{site}/{keyword}/{key}/{keyword}_{page}.csv",
+                   value)
 
 
 def save_to_s3(bucket_name, file_name, data):
@@ -31,27 +69,3 @@ def setup_driver():
     service = Service(executable_path="/opt/chrome-driver/chromedriver-linux64/chromedriver",
                       service_log_path="/tmp/chromedriver.log")
     return webdriver.Chrome(service=service, options=chrome_options)
-
-
-def lambda_handler(event, context):
-    site = event.get('site', 'fmkorea')
-    keyword = event.get('keyword', '')
-    page = event.get('page', 1)
-    result = {
-        "posts": [],
-        "comments": []
-    }
-    if site == "clien":
-        from sites import clien
-        result = clien.main(event, context, setup_driver())
-    elif site == "fmkorea":
-        from sites import fmkorea
-        result = fmkorea.main(event, context, setup_driver())
-
-    # S3에 저장
-    if len(result["posts"]) != 0:
-        save_to_s3("de3-web-scraping", f"{site}/{keyword}/posts/{keyword}_{page}.csv",
-                   result["posts"])
-        save_to_s3("de3-web-scraping", f"{site}/{keyword}/comments/{keyword}_{page}.csv",
-                   result["comments"])
-
