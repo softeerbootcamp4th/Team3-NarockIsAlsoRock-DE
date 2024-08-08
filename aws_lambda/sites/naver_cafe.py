@@ -41,7 +41,7 @@ def comments_crawling(driver, post_id): # 게시물 하나의 댓글들에 대�
                          "cmt_author": cmt_author,
                          "cmt_created_at": cmt_created_at,
                          "cmt_updated_at": None,
-                         "cmt_likes": cmt_likes},
+                         "cmt_likes": cmt_likes}
         comments_parsed.append(comments_data)
     return comments_parsed
 
