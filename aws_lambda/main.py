@@ -18,12 +18,12 @@ SLACK_WEBHOOK_PATH = '/services/T070MKQ7CJY/B07G10BC7U3/nRkzmVy5QIxTxwgWvc1R6i4x
 
 
 def lambda_handler(event, context):
-    site = event.get('site', 'fmkorea')
+    site = event.get('site', '')
     keyword = event.get('keyword', '')
     page = event.get('page', 1)
     logger.info(f"scraping start site: {site}, page: {page}, keyword: {keyword} ")
     try:
-        result = method_name(context, event, site)
+        result = scrap(context, event, site)
         save_result(keyword, page, result, site)
     except Exception as e:
         logger.error(f"error site: {site}, page: {page}, keyword: {keyword}")
@@ -36,7 +36,7 @@ def lambda_handler(event, context):
         raise
 
 
-def method_name(context, event, site):
+def scrap(context, event, site):
     result = {}
     if site == "clien":
         from sites import clien
@@ -47,6 +47,8 @@ def method_name(context, event, site):
     elif site == "naver_cafe":
         from sites import naver_cafe
         result = naver_cafe.main(event, context, setup_driver())
+    else:
+        logger.error(f"site function not found : {site}")
     return result
 
 

@@ -99,7 +99,7 @@ def main(event, context, driver: WebDriver):
     # info for naver login
     login_url='https://nid.naver.com/nidlogin.login'
     id_ = 'hmg_de'
-    pw = 'hmg_dehmg_de'
+    pw = 'hmg_de_hmg_de'
 
     driver = driver_naver_login(driver, login_url, id_, pw)
 
@@ -128,7 +128,6 @@ def main(event, context, driver: WebDriver):
 
         if posts_data != None:
             posts_parsed.append(posts_data)
-            break
         if comments_data != None:
             comments_parsed.extend(comments_data)
     driver.quit()
