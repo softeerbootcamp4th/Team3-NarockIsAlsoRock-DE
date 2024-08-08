@@ -5,7 +5,7 @@ import time
 import re
 
 
-def search_board_crawling(driver):
+def search_board_crawling(driver:WebDriver):
     # per page
     titles_elems = driver.find_elements(By.CLASS_NAME, "subject_fixed")
     created_ats_elems = driver.find_elements(By.CLASS_NAME, "timestamp")

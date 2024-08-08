@@ -4,8 +4,17 @@
     <content url="file://$MODULE_DIR$">
       <excludeFolder url="file://$MODULE_DIR$/.venv" />
       <excludeFolder url="file://$MODULE_DIR$/venv" />
+      <excludeFolder url="file://$MODULE_DIR$/sam-lambda-practice/venv" />
+      <excludeFolder url="file://$MODULE_DIR$/sam/venv" />
     </content>
     <orderEntry type="jdk" jdkName="Python 3.12 (softeer-team-project)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
+  </component>
+  <component name="PyNamespacePackagesService">
+    <option name="namespacePackageFolders">
+      <list>
+        <option value="$MODULE_DIR$/aws_lambda" />
+      </list>
+    </option>
   </component>
 </module>

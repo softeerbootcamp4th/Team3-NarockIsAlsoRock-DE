@@ -1,13 +1,14 @@
 import logging
 from tempfile import mkdtemp
 from typing import Dict, List, Any
-
+import csv
+import io
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
-import boto3
 import http.client
 import json
+import boto3
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -57,8 +58,17 @@ def save_result(keyword, page, result: Dict[str, List[Any]], site):
 
 def save_to_s3(bucket_name, file_name, data):
     s3 = boto3.client('s3')
-    csv_data = "\n".join([",".join(map(str, row.values())) for row in data])
-    s3.put_object(Bucket=bucket_name, Key=file_name, Body=csv_data)
+
+    # 메모리 내에서 CSV 형식으로 데이터 저장
+    csv_buffer = io.StringIO()
+    writer = csv.DictWriter(csv_buffer, fieldnames=data[0].keys(), quoting=csv.QUOTE_ALL)
+    # 헤더 작성
+    writer.writeheader()
+    # 데이터 작성
+    for row in data:
+        writer.writerow(row)
+    # S3에 CSV 데이터 업로드
+    s3.put_object(Bucket=bucket_name, Key=file_name, Body=csv_buffer.getvalue())
 
 
 def setup_driver():

@@ -1,27 +1,12 @@
 from selenium import webdriver
-from ..sites import clien
+from aws_lambda.sites import clien
 
 if __name__ == '__main__':
-    print(clien.main({
+    for event in [{
         "site": "clien",
         "keyword": "코나 화재",
-        "page": 4,
+        "page": i,
         "start_date": "2000-01-01",
         "end_date": "3000-12-30",
-    }, {}, webdriver.Chrome()))
-
-    print(clien.main({
-        "site": "clien",
-        "keyword": "코나 화재",
-        "page":3,
-        "start_date": "2000-01-01",
-        "end_date": "3000-12-30",
-    }, {}, webdriver.Chrome()))
-
-    print(clien.main({
-        "site": "clien",
-        "keyword": "코나 화재",
-        "page": 5,
-        "start_date": "2000-01-01",
-        "end_date": "3000-12-30",
-    }, {}, webdriver.Chrome()))
+    } for i in range(0, 31)]:
+        print(clien.main(event, {}, webdriver.Chrome()))
