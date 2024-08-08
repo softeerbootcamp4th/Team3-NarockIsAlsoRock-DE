@@ -55,6 +55,7 @@ def scrap(context, event, site):
 def save_result(keyword, page, result: Dict[str, List[Any]], site):
     # S3에 저장
     for key, value in result.items():
+        logger.info(f"saving results for {key}: {len(value)}")
         if len(value) == 0:
             continue
         save_to_s3("de3-web-scraping", f"{keyword}/{site}/{key}/{page}.csv",
