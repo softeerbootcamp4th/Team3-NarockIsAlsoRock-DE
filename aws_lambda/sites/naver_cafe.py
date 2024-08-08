@@ -1,4 +1,6 @@
 import time
+import urllib.parse
+
 from selenium import webdriver
 from bs4 import BeautifulSoup as bs
 from selenium.webdriver.chrome.webdriver import WebDriver
@@ -101,7 +103,8 @@ def main(event, context, driver: WebDriver):
 
     driver = driver_naver_login(driver, login_url, id_, pw)
 
-    board_url = f'https://cafe.naver.com/allfm01?iframe_url=/ArticleSearchList.nhn%3Fsearch.clubid=21771803%26search.media=0%26search.searchdate=all%26search.exact=%26search.include=%26userDisplay=50%26search.exclude=%26search.option=0%26search.sortBy=date%26search.searchBy=0%26search.includeAll=%26search.query={keyword}%26search.viewtype=title%26search.page={page_num}'
+    search_keyword = urllib.parse.quote(keyword.encode('euc-kr'))
+    board_url = f'https://cafe.naver.com/allfm01?iframe_url=/ArticleSearchList.nhn%3Fsearch.clubid=21771803%26search.media=0%26search.searchdate=all%26search.exact=%26search.include=%26userDisplay=50%26search.exclude=%26search.option=0%26search.sortBy=date%26search.searchBy=0%26search.includeAll=%26search.query={search_keyword}%26search.viewtype=title%26search.page={page_num}'
     driver = driver_open_url(driver, board_url)
     driver.switch_to.frame("cafe_main")
 
