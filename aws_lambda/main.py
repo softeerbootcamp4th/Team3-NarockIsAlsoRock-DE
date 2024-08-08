@@ -44,6 +44,9 @@ def method_name(context, event, site):
     elif site == "fmkorea":
         from sites import fmkorea
         result = fmkorea.main(event, context, setup_driver())
+    elif site == "naver_cafe":
+        from sites import naver_cafe
+        result = naver_cafe.main(event, context, setup_driver())
     return result
 
 
@@ -58,7 +61,6 @@ def save_result(keyword, page, result: Dict[str, List[Any]], site):
 
 def save_to_s3(bucket_name, file_name, data):
     s3 = boto3.client('s3')
-
     # 메모리 내에서 CSV 형식으로 데이터 저장
     csv_buffer = io.StringIO()
     writer = csv.DictWriter(csv_buffer, fieldnames=data[0].keys(), quoting=csv.QUOTE_ALL)
