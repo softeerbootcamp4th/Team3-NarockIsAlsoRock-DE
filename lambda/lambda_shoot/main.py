@@ -19,12 +19,12 @@ if __name__ == '__main__':
     # 여러 파라미터로 Lambda 함수 호출
     parameters = [
         {
-            "keyword": "ICCU",
+            "site": "clien",
+            "keyword": "코나 화재",
             "page": i,
             "start_date": "2000-01-01",
             "end_date": "3000-12-30",
-            "bucket_name": "fmkore-scraping-lambda"
-        } for i in range(1, 29)
+        } for i in range(0, 31)
     ]
     for index, param in enumerate(parameters):
         invoke_lambda_function(function_name, param)

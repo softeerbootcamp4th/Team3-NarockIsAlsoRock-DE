@@ -1,3 +1,4 @@
+from selenium import webdriver
 from selenium.webdriver.chrome.webdriver import WebDriver
 from selenium.webdriver.common.by import By
 from datetime import datetime
@@ -40,14 +41,6 @@ def per_post_crawling(driver):
     except:
         read = 0
         return read, None, None, None, None, None, None, None, None, None, None, None
-            
-    cmt_authors = []
-    cmt_contents = []
-    cmt_post_ids = []
-    cmt_created_ats = []
-    cmt_updated_ats = []
-    
-    
     url_value = meta_tag.get_attribute('content')
     match = re.search(r'/(\d+)$', url_value)
     post_id = int(match.group(1))
@@ -115,7 +108,7 @@ def per_post_crawling(driver):
         cmt_updated_ats.append(cmt_updated_at)
         cmt_post_ids.append(post_id)
 
-    return content, like_cnt, view_cnt, cmt_authors, cmt_contents, cmt_post_ids, cmt_created_ats, cmt_updated_ats, cmt_cnt, post_id, updated_at
+    return 1, content, like_cnt, view_cnt, cmt_authors, cmt_contents, cmt_post_ids, cmt_created_ats, cmt_updated_ats, cmt_cnt, post_id, updated_at
 
 
 def main(event, context, driver: WebDriver):
@@ -204,13 +197,3 @@ def main(event, context, driver: WebDriver):
         "posts": _posts,
         "comments": _comments
     }
-    
-    
-if __name__ == '__main__':
-    main({
-        "keyword": "코나 화재",
-        "page": 19,
-        "start_date": "2000-01-01",
-        "end_date": "3000-12-30",
-        "bucket_name": "fmkore-scraping-lambda"
-    }, {}, webdriver.Chrome())
