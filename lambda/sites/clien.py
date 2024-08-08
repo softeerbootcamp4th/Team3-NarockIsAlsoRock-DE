@@ -34,7 +34,20 @@ def search_board_crawling(driver):
 def per_post_crawling(driver):
     # per post
     # get post_id
-    meta_tag = driver.find_element(By.CSS_SELECTOR, 'meta[property="url"]')
+    try: # "잘못된 접근입니다."
+        meta_tag = driver.find_element(By.CSS_SELECTOR, 'meta[property="url"]')
+        read = 1
+    except:
+        read = 0
+        return read, None, None, None, None, None, None, None, None, None, None, None
+            
+    cmt_authors = []
+    cmt_contents = []
+    cmt_post_ids = []
+    cmt_created_ats = []
+    cmt_updated_ats = []
+    
+    
     url_value = meta_tag.get_attribute('content')
     match = re.search(r'/(\d+)$', url_value)
     post_id = int(match.group(1))
@@ -137,8 +150,10 @@ def main(event, context, driver: WebDriver):
             continue
         driver.get(post_url)
         time.sleep(2)
-        content, like_cnt, view_cnt, cmt_authors, cmt_contents, cmt_post_ids, cmt_created_ats, cmt_updated_ats, cmt_cnt, post_id, updated_at = per_post_crawling(
+        read, content, like_cnt, view_cnt, cmt_authors, cmt_contents, cmt_post_ids, cmt_created_ats, cmt_updated_ats, cmt_cnt, post_id, updated_at = per_post_crawling(
             driver)
+        if not read:
+            continue
         _cmt_post_ids.extend(cmt_authors)
         _cmt_contents.extend(cmt_contents)
         _cmt_authors.extend(cmt_post_ids)
@@ -189,3 +204,13 @@ def main(event, context, driver: WebDriver):
         "posts": _posts,
         "comments": _comments
     }
+    
+    
+if __name__ == '__main__':
+    main({
+        "keyword": "코나 화재",
+        "page": 19,
+        "start_date": "2000-01-01",
+        "end_date": "3000-12-30",
+        "bucket_name": "fmkore-scraping-lambda"
+    }, {}, webdriver.Chrome())
