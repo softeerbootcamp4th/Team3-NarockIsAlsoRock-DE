@@ -57,7 +57,7 @@ def save_result(keyword, page, result: Dict[str, List[Any]], site):
     for key, value in result.items():
         if len(value) == 0:
             continue
-        save_to_s3("de3-web-scraping", f"{site}/{keyword}/{key}/{keyword}_{page}.csv",
+        save_to_s3("de3-web-scraping", f"{keyword}/{site}/{key}/{page}.csv",
                    value)
 
 
