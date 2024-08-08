@@ -6,9 +6,14 @@ from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 import boto3
+import http.client
+import json
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
+
+SLACK_WEBHOOK_URL = 'hooks.slack.com'  # Webhook URL의 도메인
+SLACK_WEBHOOK_PATH = '/services/T070MKQ7CJY/B07G10BC7U3/nRkzmVy5QIxTxwgWvc1R6i4x'  # Webhook URL의 경로
 
 
 def lambda_handler(event, context):
@@ -22,6 +27,11 @@ def lambda_handler(event, context):
     except Exception as e:
         logger.error(f"error site: {site}, page: {page}, keyword: {keyword}")
         logger.error(str(e))
+        send_slack_message(f"error {str(e)}"
+                           f" site: {site}"
+                           f" page: {page}"
+                           f" keyword: {keyword}")
+
         raise
 
 
@@ -71,3 +81,17 @@ def setup_driver():
     service = Service(executable_path="/opt/chrome-driver/chromedriver-linux64/chromedriver",
                       service_log_path="/tmp/chromedriver.log")
     return webdriver.Chrome(service=service, options=chrome_options)
+
+
+def send_slack_message(message):
+    conn = http.client.HTTPSConnection(SLACK_WEBHOOK_URL)
+    payload = json.dumps({'text': message})
+    headers = {'Content-Type': 'application/json'}
+
+    try:
+        conn.request("POST", SLACK_WEBHOOK_PATH, payload, headers)
+        response = conn.getresponse()
+        if response.status != 200:
+            logger.error(f"Slack 메시지 전송 실패: {response.status}, {response.read().decode()}")
+    except Exception as e:
+        logger.error(f"Slack 메시지 전송 중 오류 발생: {e}")
