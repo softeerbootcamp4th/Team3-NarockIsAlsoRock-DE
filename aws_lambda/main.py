@@ -37,7 +37,6 @@ def lambda_handler(event, context):
     site = event.get('site', 'fmkorea')
     keyword = event.get('keyword', '')
     page = event.get('page', 1)
-
     result = {
         "posts": [],
         "comments": []
@@ -55,3 +54,4 @@ def lambda_handler(event, context):
                    result["posts"])
         save_to_s3("de3-web-scraping", f"{site}/{keyword}/comments/{keyword}_{page}.csv",
                    result["comments"])
+
