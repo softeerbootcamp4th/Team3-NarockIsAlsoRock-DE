@@ -99,7 +99,7 @@ def main(event, context, driver: WebDriver):
     # info for naver login
     login_url='https://nid.naver.com/nidlogin.login'
     id_ = 'hmg_de'
-    pw = 'hmg_de_hmg_de'
+    pw = 'hmg_de_hmg_de1'
 
     driver = driver_naver_login(driver, login_url, id_, pw)
 
