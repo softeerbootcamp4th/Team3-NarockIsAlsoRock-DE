@@ -1,5 +1,7 @@
 import logging
 from tempfile import mkdtemp
+from typing import Dict, List, Any
+
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
@@ -34,7 +36,7 @@ def method_name(context, event, site):
     return result
 
 
-def save_result(keyword, page, result, site):
+def save_result(keyword, page, result: Dict[str, List[Any]], site):
     # S3에 저장
     for key, value in result.items():
         if len(value) == 0:
