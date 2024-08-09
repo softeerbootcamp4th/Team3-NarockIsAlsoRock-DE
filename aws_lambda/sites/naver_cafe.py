@@ -29,13 +29,12 @@ def comments_crawling(driver, post_id): # 게시물 하나의 댓글들에 대�
     for elem in cmt_elem:
         try: # 댓글에 내용이 없는 경우, 다음 댓글로 이동 (네이버 카페 클린봇)
             cmt_content = elem.find_element(By.CLASS_NAME, 'text_comment').get_attribute('textContent').strip()
+            cmt_author = elem.find_element(By.CLASS_NAME, 'comment_nickname').get_attribute('textContent').strip()
+            cmt_created_at_str = elem.find_element(By.CLASS_NAME, 'comment_info_date').get_attribute('textContent').strip()
+            cmt_created_at = datetime.strptime(cmt_created_at_str, "%Y.%m.%d. %H:%M")
+            cmt_likes = elem.find_element(By.CLASS_NAME, 'u_cnt._count').text
         except:
             continue
-        cmt_author = elem.find_element(By.CLASS_NAME, 'comment_nickname').get_attribute('textContent').strip()
-        cmt_created_at_str = elem.find_element(By.CLASS_NAME, 'comment_info_date').get_attribute('textContent').strip()
-        cmt_created_at = datetime.strptime(cmt_created_at_str, "%Y.%m.%d. %H:%M")
-        cmt_likes = elem.find_element(By.CLASS_NAME, 'u_cnt._count').text
-
         comments_data = {"post_id": post_id,
                          "cmt_content": cmt_content,
                          "cmt_author": cmt_author,
