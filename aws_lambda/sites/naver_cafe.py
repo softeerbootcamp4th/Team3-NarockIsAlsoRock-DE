@@ -93,8 +93,10 @@ def main(event, context, driver: WebDriver):
     # from lambda event
     keyword = event.get('keyword', '')
     page_num = event.get('page', '')
-    timestamp_datetime_start = datetime.strptime(event.get('start_date', '2024-06-29'), '%Y-%m-%d')
-    timestamp_datetime_end = datetime.strptime(event.get('end_date', '2024-07-29'), '%Y-%m-%d')
+    start_date_str = event.get('start_date', '2024-06-29')
+    end_date_str = event.get('end_date', '2024-07-29')
+    timestamp_datetime_start = datetime.strptime(start_date_str, '%Y-%m-%d')
+    timestamp_datetime_end = datetime.strptime(end_date_str, '%Y-%m-%d')
 
     # info for naver login
     login_url='https://nid.naver.com/nidlogin.login'
@@ -104,7 +106,7 @@ def main(event, context, driver: WebDriver):
     driver = driver_naver_login(driver, login_url, id_, pw)
 
     search_keyword = urllib.parse.quote(keyword.encode('euc-kr'))
-    board_url = f'https://cafe.naver.com/allfm01?iframe_url=/ArticleSearchList.nhn%3Fsearch.clubid=21771803%26search.media=0%26search.searchdate=all%26search.exact=%26search.include=%26userDisplay=50%26search.exclude=%26search.option=0%26search.sortBy=date%26search.searchBy=0%26search.includeAll=%26search.query={search_keyword}%26search.viewtype=title%26search.page={page_num}'
+    board_url = f'https://cafe.naver.com/allfm01?iframe_url=/ArticleSearchList.nhn%3Fsearch.clubid=21771803%26search.media=0%26search.searchdate={start_date_str}{end_date_str}%26search.exact=%26search.include=%26userDisplay=50%26search.exclude=%26search.option=0%26search.sortBy=date%26search.searchBy=0%26search.includeAll=%26search.query={search_keyword}%26search.viewtype=title%26search.page={page_num}'
     driver = driver_open_url(driver, board_url)
     driver.switch_to.frame("cafe_main")
 
