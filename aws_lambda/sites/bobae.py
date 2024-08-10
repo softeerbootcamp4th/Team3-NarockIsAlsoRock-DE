@@ -165,6 +165,10 @@ def main(event, context, driver: WebDriver):
     posts_parsed, comments_parsed = [], []
     # 10개의 글에 대해
     for link, author in zip(links, authors):
+        # 뉴스는 제외
+        if 'news' in link:
+            continue
+        
         posts_data, comments_data = post_crawling(driver, path + link, author)
 
         if posts_data != None:
