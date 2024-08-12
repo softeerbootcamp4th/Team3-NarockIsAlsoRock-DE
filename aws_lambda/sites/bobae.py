@@ -8,9 +8,13 @@ from bs4 import BeautifulSoup as bs
 from selenium.webdriver.chrome.webdriver import WebDriver
 from datetime import datetime
 
+from selenium.webdriver.support import expected_conditions
+from selenium.webdriver.support.wait import WebDriverWait
+
 
 def cmt_crawling(driver, post_id):
     try:
+        WebDriverWait(driver, 2).until(expected_conditions.presence_of_element_located((By.ID, 'cmt_reply')))
         basiclist = driver.find_element(By.ID, 'cmt_reply')
     except:
         # 댓글이 없는 경우임
@@ -93,7 +97,8 @@ def post_crawling(driver, url, author):
     #######################
     comments_parsed = []
     comments_data = cmt_crawling(driver, post_id=id)
-    comments_parsed.append(comments_data)
+    if comments_data is not None:
+        comments_parsed.append(comments_data)
 
     inSearchG = driver.find_element(By.ID, 'cmt_search')
 
@@ -110,7 +115,6 @@ def post_crawling(driver, url, author):
     if cmt_page > 1:
         for i in range(cmt_page - 1, 0, -1):
             driver.execute_script(f"javascript:sel_cmt_paging('{i}');")
-            time.sleep(0.3)
             comments_data = cmt_crawling(driver, post_id=id)
             if comments_data is not None:
                 comments_parsed.append(comments_data)
@@ -129,7 +133,7 @@ def main(event, context, driver: WebDriver):
 
     path = "https://www.bobaedream.co.kr/"
     driver.get(path)
-    time.sleep(0.5)
+    WebDriverWait(driver, 2).until(expected_conditions.element_to_be_clickable((By.XPATH, '/html/body/div[2]/div[2]/div/div[2]/ul/li[1]/button/span')))
 
     # 검색창 클릭
     driver.find_element(By.XPATH, '/html/body/div[2]/div[2]/div/div[2]/ul/li[1]/button/span').click()
@@ -141,6 +145,7 @@ def main(event, context, driver: WebDriver):
     input_element.send_keys(keyword)
     input_element.submit()
 
+    WebDriverWait(driver, 2).until(expected_conditions.element_to_be_clickable((By.XPATH, '/html/body/div/div[3]/div[2]/div[5]/div[2]/a')))
     # 커뮤니티 더보기 클릭
     driver.find_element(By.XPATH, '/html/body/div/div[3]/div[2]/div[5]/div[2]/a').click()
 
@@ -164,11 +169,15 @@ def main(event, context, driver: WebDriver):
 
     posts_parsed, comments_parsed = [], []
     # 10개의 글에 대해
-    for link, author in zip(links, authors):
+    for link, author,date in zip(links, authors,dates):
         # 뉴스는 제외
         if 'news' in link:
             continue
-        
+        print(datetime.strptime(date, '%y. %m. %d'))
+        if not timestamp_datetime_start <= datetime.strptime(date, '%y. %m. %d'):
+            continue
+        if not datetime.strptime(date, '%y. %m. %d') <= timestamp_datetime_end:
+            break
         posts_data, comments_data = post_crawling(driver, path + link, author)
 
         if posts_data != None:
@@ -180,3 +189,36 @@ def main(event, context, driver: WebDriver):
         "posts": posts_parsed,
         "comments": comments_parsed
     }
+
+
+if __name__ == '__main__':
+    from selenium import webdriver
+    import csv
+
+    results = main({
+        "keyword": "iccu",
+        "page": 1,
+        'start_date': '2020-06-29',
+        'end_date': '2024-08-29'
+    }, {}, webdriver.Chrome())
+    posts = results["posts"]
+    comments = results["comments"]
+    # _posts를 CSV 파일로 저장
+    with open('posts.csv', mode='w', newline='', encoding='utf-8') as posts_file:
+        fieldnames = ["id", "title", "content", "likes", "url", "author", "views", "created_at", "updated_at"]
+        writer = csv.DictWriter(posts_file, fieldnames=fieldnames)
+
+        writer.writeheader()  # 헤더 작성
+        for post in posts:
+            writer.writerow(post)  # 각 포스트 데이터 작성
+    # _comments를 CSV 파일로 저장
+    with open('comments.csv', mode='w', newline='', encoding='utf-8') as comments_file:
+        fieldnames = ["post_id", "cmt_content", "cmt_author", "cmt_created_at", "cmt_updated_at", "cmt_likes"]
+        writer = csv.DictWriter(comments_file, fieldnames=fieldnames)
+
+        writer.writeheader()  # 헤더 작성
+        for comment in comments:
+            print(comment)
+            writer.writerow(comment)  # 각 댓글 데이터 작성
+
+    print("CSV 파일 저장 완료!")
