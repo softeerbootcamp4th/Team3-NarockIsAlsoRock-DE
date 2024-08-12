@@ -39,8 +39,8 @@ def cmt_crawling(driver, post_id):
             "cmt_content": content,
             "cmt_author": author,
             "cmt_created_at": date,
-            "cmt_updated_at": None,
-            "cmt_likes": cmt_likes
+            # "cmt_updated_at": None,
+            # "cmt_likes": cmt_likes
         }
     return comments_data
 

@@ -190,7 +190,7 @@ def main(event, context, driver: WebDriver):
             "cmt_content": clean_content(comments["cmt_content"][i]),
             "cmt_author": comments["cmt_author"][i],
             "cmt_created_at": comments["cmt_created_at"][i],
-            "cmt_updated_at": comments["cmt_updated_at"][i],
+            # "cmt_updated_at": comments["cmt_updated_at"][i],
         })
 
     return {
@@ -221,7 +221,7 @@ if __name__ == '__main__':
             writer.writerow(post)  # 각 포스트 데이터 작성
     # _comments를 CSV 파일로 저장
     with open('comments.csv', mode='w', newline='', encoding='utf-8') as comments_file:
-        fieldnames = ["post_id", "cmt_content", "cmt_author", "cmt_created_at", "cmt_updated_at"]
+        fieldnames = ["post_id", "cmt_content", "cmt_author", "cmt_created_at"]
         writer = csv.DictWriter(comments_file, fieldnames=fieldnames)
 
         writer.writeheader()  # 헤더 작성
