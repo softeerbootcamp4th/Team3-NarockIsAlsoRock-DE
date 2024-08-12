@@ -1,7 +1,6 @@
 import re
 import time
 import urllib.parse
-from selenium import webdriver
 from bs4 import BeautifulSoup as bs
 from selenium.webdriver.chrome.webdriver import WebDriver
 from selenium.webdriver.common.by import By
@@ -143,9 +142,9 @@ def post_crawling(driver, title, url, datetime_start, datetime_end):  # 게시�
 def in_range(datetime, datetime_start, datetime_end):
     return datetime_start <= datetime <= datetime_end
 
+
 def clean_content(content):
     return re.sub(r'\s+', ' ', content.replace('\r\n', ' ').replace('\n', ' ')).strip()
-
 
 
 if __name__ == '__main__':

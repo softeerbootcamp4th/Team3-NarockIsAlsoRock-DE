@@ -1,11 +1,11 @@
 from datetime import datetime
 from bs4 import BeautifulSoup, Comment
-from selenium import webdriver
 from selenium.common import NoSuchElementException
 from selenium.webdriver.chrome.webdriver import WebDriver
 from selenium.webdriver.common.by import By
 from urllib.parse import urlparse
 import re
+
 
 def main(event, context, driver: WebDriver):
     keyword = event.get('keyword', '')
@@ -56,6 +56,7 @@ def main(event, context, driver: WebDriver):
         "comments": comments_parsed
     }
 
+
 def parse_post_detail(bs: BeautifulSoup, current_url: str):
     post_id = urlparse(current_url).path.split('/')[-1]
     title = bs.find('span', class_='np_18px_span').text.strip()
@@ -98,6 +99,7 @@ def extract_content(bs: BeautifulSoup):
 def clean_content(content):
     return re.sub(r'\s+', ' ', ' \n'.join(content).replace('\r\n', ' ').replace('\n', ' ')).strip()
 
+
 def extract_views_likes(bs: BeautifulSoup):
     side = bs.find("div", class_="side fr")
     views = side.find_all('b')[0].text.strip()
@@ -118,7 +120,6 @@ def extract_comments(bs: BeautifulSoup, post_id: str):
             'cmt_created_at': comment_time
         })
     return comments
-
 
 
 if __name__ == '__main__':

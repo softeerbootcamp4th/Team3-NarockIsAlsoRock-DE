@@ -1,4 +1,5 @@
 import re
+
 from selenium.webdriver.common.by import By
 from bs4 import BeautifulSoup as bs
 from selenium.webdriver.chrome.webdriver import WebDriver
@@ -42,9 +43,16 @@ def main(event, context, driver: WebDriver):
     driver.execute_script(new_href)
 
     soup = bs(driver.page_source, 'html.parser')
+    WebDriverWait(driver, 2).until(
+        expected_conditions.presence_of_element_located((By.CSS_SELECTOR, 'div.search_Community ul dl')))
 
     article = soup.select('div.search_Community ul dl')
-    texts = [i.find('dd', class_='path').text.strip().split('\n') for i in article]
+
+    texts = [
+        i.find('dd', class_='path').text.strip().split('\n') if i.find('dd', class_='path') else None
+        for i in article
+    ]
+    texts = [text for text in texts if text]  # path 가 존재하지 않는 경우가 있어요
     links = [link.a['href'] for link in article]
     boards = [i[0] for i in texts]
     authors = [i[1] for i in texts]
@@ -61,7 +69,6 @@ def main(event, context, driver: WebDriver):
         # 뉴스는 제외
         if 'news' in link:
             continue
-        print(datetime.strptime(date, '%y. %m. %d'))
         if not timestamp_datetime_start <= datetime.strptime(date, '%y. %m. %d'):
             continue
         if not datetime.strptime(date, '%y. %m. %d') <= timestamp_datetime_end:
@@ -190,33 +197,26 @@ def post_crawling(driver, url, author):
 
 
 if __name__ == '__main__':
+    from aws_lambda.sites.utils import save_csv
     from selenium import webdriver
-    import csv
 
-    results = main({
-        "keyword": "iccu",
-        "page": 1,
-        'start_date': '2020-06-29',
-        'end_date': '2024-08-29'
-    }, {}, webdriver.Chrome())
-    posts = results["posts"]
-    comments = results["comments"]
-    # _posts를 CSV 파일로 저장
-    with open('posts.csv', mode='w', newline='', encoding='utf-8') as posts_file:
-        fieldnames = ["id", "title", "content", "likes", "url", "author", "views", "created_at", "updated_at"]
-        writer = csv.DictWriter(posts_file, fieldnames=fieldnames)
-
-        writer.writeheader()  # 헤더 작성
-        for post in posts:
-            writer.writerow(post)  # 각 포스트 데이터 작성
-    # _comments를 CSV 파일로 저장
-    with open('comments.csv', mode='w', newline='', encoding='utf-8') as comments_file:
-        fieldnames = ["post_id", "cmt_content", "cmt_author", "cmt_created_at", "cmt_updated_at", "cmt_likes"]
-        writer = csv.DictWriter(comments_file, fieldnames=fieldnames)
-
-        writer.writeheader()  # 헤더 작성
-        for comment in comments:
-            print(comment)
-            writer.writerow(comment)  # 각 댓글 데이터 작성
-
-    print("CSV 파일 저장 완료!")
+    payloads = [
+        {
+            "site": "bobae",
+            "keyword": "코나 화재",
+            "page": i,
+            "start_date": "2019-7-26",
+            "end_date": "2024-08-30",
+        } for i in [32, 38, 12, 2, 9]
+    ]
+    for payload in payloads:
+        results = main(payload, {}, webdriver.Chrome())
+        posts = results["posts"]
+        comments = results["comments"]
+        print(f"posts {len(posts)}")
+        print(f"comments {len(comments)}")
+        keyword = payload["keyword"]
+        site = payload["site"]
+        page = payload["page"]
+        save_csv(posts, f"./{keyword}/{site}/posts", page)
+        save_csv(comments, f"./{keyword}/{site}/comments", page)

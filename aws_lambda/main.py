@@ -28,12 +28,8 @@ def lambda_handler(event, context):
     except Exception as e:
         logger.error(f"error site: {site}, page: {page}, keyword: {keyword}")
         logger.error(str(e))
-        send_slack_message(f"error {str(e)}"
-                           f" site: {site}"
-                           f" page: {page}"
-                           f" keyword: {keyword}")
-
-        raise
+        send_slack_message(f"error site: {site}, page: {page}, keyword: {keyword}")
+        raise e
 
 
 def scrap(context, event, site):
@@ -47,6 +43,9 @@ def scrap(context, event, site):
     elif site == "naver_cafe":
         from sites import naver_cafe
         result = naver_cafe.main(event, context, setup_driver())
+    elif site == "bobae":
+        from sites import bobae
+        result = bobae.main(event, context, setup_driver())
     else:
         logger.error(f"site function not found : {site}")
     return result

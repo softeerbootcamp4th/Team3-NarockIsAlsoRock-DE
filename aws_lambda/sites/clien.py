@@ -57,7 +57,7 @@ def main(event, context, driver: WebDriver):
         updated_ats.append(updated_at)
     driver.quit()
 
-    posts = {"id": post_ids, "title": _titles, 'content': contents, 'likes': likes, 'url': _urls, \
+    posts = {"id": post_ids, "title": _titles, 'content': contents, 'likes': likes, 'url': _urls,
              'author': _authors, 'views': views, "created_at": _created_ats, "updated_at": updated_ats}
     comments = {"post_id": _cmt_post_ids, "cmt_content": _cmt_contents, "cmt_author": _cmt_authors,
                 "cmt_created_at": _cmt_created_ats, "cmt_updated_at": _cmt_updated_ats}
@@ -91,7 +91,6 @@ def main(event, context, driver: WebDriver):
         "posts": _posts,
         "comments": _comments
     }
-
 
 
 def search_board_crawling(driver: WebDriver):
@@ -195,10 +194,9 @@ def per_post_crawling(driver):
         print(e)
         return None, None, None, None, None, None, None, None, None, None, None
 
+
 def clean_content(content):
     return re.sub(r'\s+', ' ', content.replace('\r\n', ' ').replace('\n', ' ')).strip()
-
-
 
 
 if __name__ == '__main__':
