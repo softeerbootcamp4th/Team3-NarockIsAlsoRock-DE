@@ -51,6 +51,8 @@ def save_csv(result, directory, page):
         # 디렉토리가 없으면 생성
         if not os.path.exists(path):
             os.makedirs(path)
+        if len(value) == 0:
+            continue
         # CSV 파일로 저장
         with open(f"{path}/{page}.csv", mode='w', newline='', encoding='utf-8') as comments_file:
             writer = csv.DictWriter(comments_file, fieldnames=value[0].keys())  # 헤더를 위해 필드명 설정
