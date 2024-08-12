@@ -50,7 +50,6 @@ def extract_content(bs: BeautifulSoup):
 def clean_content(content):
     return re.sub(r'\s+', ' ', ' \n'.join(content).replace('\r\n', ' ').replace('\n', ' ')).strip()
 
-
 def extract_views_likes(bs: BeautifulSoup):
     side = bs.find("div", class_="side fr")
     views = side.find_all('b')[0].text.strip()
@@ -66,12 +65,11 @@ def extract_comments(bs: BeautifulSoup, post_id: str):
         comment_time = comment.find('span', class_='date').text.strip()
         comments.append({
             'post_id': post_id,
-            'author': comment_author,
-            'content': comment_content,
-            'time': comment_time
+            'cmt_author': comment_author,
+            'cmt_content': comment_content,
+            'cmt_created_at': comment_time
         })
     return comments
-
 
 def main(event, context, driver: WebDriver):
     keyword = event.get('keyword', '')
@@ -124,9 +122,31 @@ def main(event, context, driver: WebDriver):
 
 
 if __name__ == '__main__':
-    print(main({
+    from selenium import webdriver
+    import csv
+
+    results = main({
         "keyword": "iccu",
-        "page": 20,
-        'start_date': '2020-06-29',
-        'end_date': '2024-07-29'
-    }, {}, webdriver.Chrome()))
+        "page": 1,
+        'start_date': '2000-06-29',
+        'end_date': '2040-07-29'
+    }, {}, webdriver.Chrome())
+    posts = results["posts"]
+    comments = results["comments"]
+    # _posts를 CSV 파일로 저장
+    with open('posts.csv', mode='w', newline='', encoding='utf-8') as posts_file:
+        fieldnames = ["id", "title", "content", "likes", "url", "author", "views", "created_at", "updated_at"]
+        writer = csv.DictWriter(posts_file, fieldnames=fieldnames)
+
+        writer.writeheader()  # 헤더 작성
+        for post in posts:
+            writer.writerow(post)  # 각 포스트 데이터 작성
+    with open('comments.csv', mode='w', newline='', encoding='utf-8') as comments_file:
+        fieldnames = ["post_id", "cmt_content", "cmt_author", "cmt_created_at", "cmt_updated_at"]
+        writer = csv.DictWriter(comments_file, fieldnames=fieldnames)
+
+        writer.writeheader()  # 헤더 작성
+        for comment in comments:
+            writer.writerow(comment)  # 각 댓글 데이터 작성
+
+    print("CSV 파일 저장 완료!")
