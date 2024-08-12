@@ -6,8 +6,92 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions
 
 
-def clean_content(content):
-    return re.sub(r'\s+', ' ', content.replace('\r\n', ' ').replace('\n', ' ')).strip()
+def main(event, context, driver: WebDriver):
+    keyword = event.get('keyword', '')
+    page = event.get('page', 1)
+    datetime_start = datetime.strptime(event.get('start_date', '2024-06-29'), '%Y-%m-%d')
+    datetime_end = datetime.strptime(event.get('end_date', '2024-07-29'), '%Y-%m-%d')
+    driver.get(f'https://www.clien.net/service/search?q={keyword}&sort=recency&p={page}&boardCd=&isBoard=false')
+
+    titles, urls, created_ats, authors = search_board_crawling(driver)
+
+    post_ids = []
+    _titles = []
+    _urls = []
+    _created_ats = []
+    _authors = []
+    updated_ats = []
+    contents = []
+    likes = []
+    views = []
+
+    _cmt_post_ids = []
+    _cmt_contents = []
+    _cmt_authors = []
+    _cmt_created_ats = []
+    _cmt_updated_ats = []
+
+    for title, post_url, created_at, author in zip(titles, urls, created_ats, authors):
+        if not datetime_start <= datetime.strptime(created_at, '%Y-%m-%d %H:%M:%S') <= datetime_end:
+            continue
+        if not datetime.strptime(created_at, '%Y-%m-%d %H:%M:%S') <= datetime_end:
+            break
+        driver.get(post_url)
+        content, like_cnt, view_cnt, cmt_authors, cmt_contents, cmt_post_ids, cmt_created_ats, cmt_updated_ats, cmt_cnt, post_id, updated_at = per_post_crawling(
+            driver)
+        if post_id is None:
+            continue
+        _cmt_post_ids.extend(cmt_authors)
+        _cmt_contents.extend(cmt_contents)
+        _cmt_authors.extend(cmt_post_ids)
+        _cmt_created_ats.extend(cmt_created_ats)
+        _cmt_updated_ats.extend(cmt_updated_ats)
+        post_ids.append(post_id)
+        _titles.append(title)
+        _urls.append(post_url)
+        _created_ats.append(created_at)
+        _authors.append(author)
+        contents.append(content)
+        likes.append(like_cnt)
+        views.append(view_cnt)
+        updated_ats.append(updated_at)
+    driver.quit()
+
+    posts = {"id": post_ids, "title": _titles, 'content': contents, 'likes': likes, 'url': _urls, \
+             'author': _authors, 'views': views, "created_at": _created_ats, "updated_at": updated_ats}
+    comments = {"post_id": _cmt_post_ids, "cmt_content": _cmt_contents, "cmt_author": _cmt_authors,
+                "cmt_created_at": _cmt_created_ats, "cmt_updated_at": _cmt_updated_ats}
+
+    # 변환 작업
+    _posts = []
+    for i in range(len(posts["id"])):
+        _posts.append({
+            "id": posts["id"][i],
+            "title": clean_content(posts["title"][i]),
+            "content": clean_content(posts["content"][i]),
+            "likes": posts["likes"][i],
+            "url": posts["url"][i],
+            "author": posts["author"][i],
+            "views": posts["views"][i],
+            "created_at": posts["created_at"][i],
+            "updated_at": posts["updated_at"][i]
+        })
+    # 변환 작업
+    _comments = []
+    for i in range(len(comments["post_id"])):
+        _comments.append({
+            "post_id": comments["post_id"][i],
+            "cmt_content": clean_content(comments["cmt_content"][i]),
+            "cmt_author": comments["cmt_author"][i],
+            "cmt_created_at": comments["cmt_created_at"][i],
+            # "cmt_updated_at": comments["cmt_updated_at"][i],
+        })
+
+    return {
+        "posts": _posts,
+        "comments": _comments
+    }
+
 
 
 def search_board_crawling(driver: WebDriver):
@@ -111,92 +195,10 @@ def per_post_crawling(driver):
         print(e)
         return None, None, None, None, None, None, None, None, None, None, None
 
+def clean_content(content):
+    return re.sub(r'\s+', ' ', content.replace('\r\n', ' ').replace('\n', ' ')).strip()
 
-def main(event, context, driver: WebDriver):
-    keyword = event.get('keyword', '')
-    page = event.get('page', 1)
-    datetime_start = datetime.strptime(event.get('start_date', '2024-06-29'), '%Y-%m-%d')
-    datetime_end = datetime.strptime(event.get('end_date', '2024-07-29'), '%Y-%m-%d')
-    driver.get(f'https://www.clien.net/service/search?q={keyword}&sort=recency&p={page}&boardCd=&isBoard=false')
 
-    titles, urls, created_ats, authors = search_board_crawling(driver)
-
-    post_ids = []
-    _titles = []
-    _urls = []
-    _created_ats = []
-    _authors = []
-    updated_ats = []
-    contents = []
-    likes = []
-    views = []
-
-    _cmt_post_ids = []
-    _cmt_contents = []
-    _cmt_authors = []
-    _cmt_created_ats = []
-    _cmt_updated_ats = []
-
-    for title, post_url, created_at, author in zip(titles, urls, created_ats, authors):
-        if not datetime_start <= datetime.strptime(created_at, '%Y-%m-%d %H:%M:%S') <= datetime_end:
-            continue
-        if not datetime.strptime(created_at, '%Y-%m-%d %H:%M:%S') <= datetime_end:
-            break
-        driver.get(post_url)
-        content, like_cnt, view_cnt, cmt_authors, cmt_contents, cmt_post_ids, cmt_created_ats, cmt_updated_ats, cmt_cnt, post_id, updated_at = per_post_crawling(
-            driver)
-        if post_id is None:
-            continue
-        _cmt_post_ids.extend(cmt_authors)
-        _cmt_contents.extend(cmt_contents)
-        _cmt_authors.extend(cmt_post_ids)
-        _cmt_created_ats.extend(cmt_created_ats)
-        _cmt_updated_ats.extend(cmt_updated_ats)
-        post_ids.append(post_id)
-        _titles.append(title)
-        _urls.append(post_url)
-        _created_ats.append(created_at)
-        _authors.append(author)
-        contents.append(content)
-        likes.append(like_cnt)
-        views.append(view_cnt)
-        updated_ats.append(updated_at)
-    driver.quit()
-
-    posts = {"id": post_ids, "title": _titles, 'content': contents, 'likes': likes, 'url': _urls, \
-             'author': _authors, 'views': views, "created_at": _created_ats, "updated_at": updated_ats}
-    comments = {"post_id": _cmt_post_ids, "cmt_content": _cmt_contents, "cmt_author": _cmt_authors,
-                "cmt_created_at": _cmt_created_ats, "cmt_updated_at": _cmt_updated_ats}
-
-    # 변환 작업
-    _posts = []
-    for i in range(len(posts["id"])):
-        _posts.append({
-            "id": posts["id"][i],
-            "title": clean_content(posts["title"][i]),
-            "content": clean_content(posts["content"][i]),
-            "likes": posts["likes"][i],
-            "url": posts["url"][i],
-            "author": posts["author"][i],
-            "views": posts["views"][i],
-            "created_at": posts["created_at"][i],
-            "updated_at": posts["updated_at"][i]
-        })
-    # 변환 작업
-    _comments = []
-    for i in range(len(comments["post_id"])):
-        _comments.append({
-            "post_id": comments["post_id"][i],
-            "cmt_content": clean_content(comments["cmt_content"][i]),
-            "cmt_author": comments["cmt_author"][i],
-            "cmt_created_at": comments["cmt_created_at"][i],
-            # "cmt_updated_at": comments["cmt_updated_at"][i],
-        })
-
-    return {
-        "posts": _posts,
-        "comments": _comments
-    }
 
 
 if __name__ == '__main__':

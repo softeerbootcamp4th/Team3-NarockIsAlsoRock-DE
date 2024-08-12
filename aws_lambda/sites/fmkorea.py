@@ -7,6 +7,54 @@ from selenium.webdriver.common.by import By
 from urllib.parse import urlparse
 import re
 
+def main(event, context, driver: WebDriver):
+    keyword = event.get('keyword', '')
+    page = event.get('page', 1)
+    start_date = datetime.strptime(event.get('start_date', '2024-06-29'), '%Y-%m-%d')
+    end_date = datetime.strptime(event.get('end_date', '2024-07-29'), '%Y-%m-%d')
+    driver.implicitly_wait(2)
+    driver.get(
+        f"https://www.fmkorea.com/search.php?act=IS&is_keyword={keyword}&mid=home&where=document&page={page}&search_target=title_content")
+    # 'ul' 태그의 클래스가 'searchResult'인 요소 찾기
+    try:
+        search_result_ul = driver.find_element(By.CLASS_NAME, "searchResult")
+    except NoSuchElementException:
+        print("No search result")
+        return {
+            "posts": [],
+            "comments": []
+        }
+    posts_parsed, comments_parsed = [], []
+    # 'li' 태그 찾기
+    li_elements = search_result_ul.find_elements(By.TAG_NAME, "li")
+    post_links = []
+    for li in li_elements:
+        timestamp_str = li.find_element(By.CLASS_NAME, "time").text
+        timestamp_datetime = datetime.strptime(timestamp_str, "%Y-%m-%d %H:%M")
+        if not start_date <= timestamp_datetime:
+            continue
+        if not timestamp_datetime <= end_date:
+            break
+        a_tag = li.find_element(By.TAG_NAME, "a")
+        post_link = a_tag.get_attribute("href")
+        post_links.append(post_link)
+    print(f"parsing {len(post_links)} posts")
+    for link in post_links:
+        try:
+            driver.get(link)
+            driver.find_element(By.CLASS_NAME, "np_18px_span").text.strip()
+            post_detail, comments = parse_post_detail(BeautifulSoup(driver.page_source, 'html.parser'),
+                                                      driver.current_url)
+            posts_parsed.append(post_detail)
+            comments_parsed.extend(comments)
+        except Exception as e:
+            print(e)
+    print(f"parsed {len(posts_parsed)} posts, {len(comments_parsed)} comments")
+    driver.quit()
+    return {
+        "posts": posts_parsed,
+        "comments": comments_parsed
+    }
 
 def parse_post_detail(bs: BeautifulSoup, current_url: str):
     post_id = urlparse(current_url).path.split('/')[-1]
@@ -71,54 +119,6 @@ def extract_comments(bs: BeautifulSoup, post_id: str):
         })
     return comments
 
-def main(event, context, driver: WebDriver):
-    keyword = event.get('keyword', '')
-    page = event.get('page', 1)
-    start_date = datetime.strptime(event.get('start_date', '2024-06-29'), '%Y-%m-%d')
-    end_date = datetime.strptime(event.get('end_date', '2024-07-29'), '%Y-%m-%d')
-    driver.implicitly_wait(2)
-    driver.get(
-        f"https://www.fmkorea.com/search.php?act=IS&is_keyword={keyword}&mid=home&where=document&page={page}&search_target=title_content")
-    # 'ul' 태그의 클래스가 'searchResult'인 요소 찾기
-    try:
-        search_result_ul = driver.find_element(By.CLASS_NAME, "searchResult")
-    except NoSuchElementException:
-        print("No search result")
-        return {
-            "posts": [],
-            "comments": []
-        }
-    posts_parsed, comments_parsed = [], []
-    # 'li' 태그 찾기
-    li_elements = search_result_ul.find_elements(By.TAG_NAME, "li")
-    post_links = []
-    for li in li_elements:
-        timestamp_str = li.find_element(By.CLASS_NAME, "time").text
-        timestamp_datetime = datetime.strptime(timestamp_str, "%Y-%m-%d %H:%M")
-        if not start_date <= timestamp_datetime:
-            continue
-        if not timestamp_datetime <= end_date:
-            break
-        a_tag = li.find_element(By.TAG_NAME, "a")
-        post_link = a_tag.get_attribute("href")
-        post_links.append(post_link)
-    print(f"parsing {len(post_links)} posts")
-    for link in post_links:
-        try:
-            driver.get(link)
-            driver.find_element(By.CLASS_NAME, "np_18px_span").text.strip()
-            post_detail, comments = parse_post_detail(BeautifulSoup(driver.page_source, 'html.parser'),
-                                                      driver.current_url)
-            posts_parsed.append(post_detail)
-            comments_parsed.extend(comments)
-        except Exception as e:
-            print(e)
-    print(f"parsed {len(posts_parsed)} posts, {len(comments_parsed)} comments")
-    driver.quit()
-    return {
-        "posts": posts_parsed,
-        "comments": comments_parsed
-    }
 
 
 if __name__ == '__main__':

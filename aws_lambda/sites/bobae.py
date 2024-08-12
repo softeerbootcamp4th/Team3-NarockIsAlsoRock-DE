@@ -1,8 +1,4 @@
-import time
 import re
-import time
-import urllib.parse
-from selenium import webdriver
 from selenium.webdriver.common.by import By
 from bs4 import BeautifulSoup as bs
 from selenium.webdriver.chrome.webdriver import WebDriver
@@ -10,6 +6,77 @@ from datetime import datetime
 
 from selenium.webdriver.support import expected_conditions
 from selenium.webdriver.support.wait import WebDriverWait
+
+
+def main(event, context, driver: WebDriver):
+    # from lambda event
+    keyword = event.get('keyword', '')
+    page_num = event.get('page', '')
+    start_date_str = event.get('start_date', '2024-06-29')
+    end_date_str = event.get('end_date', '2024-07-29')
+    timestamp_datetime_start = datetime.strptime(start_date_str, '%Y-%m-%d')
+    timestamp_datetime_end = datetime.strptime(end_date_str, '%Y-%m-%d')
+
+    path = "https://www.bobaedream.co.kr/"
+    driver.get(path)
+    WebDriverWait(driver, 2).until(expected_conditions.element_to_be_clickable(
+        (By.XPATH, '/html/body/div[2]/div[2]/div/div[2]/ul/li[1]/button/span')))
+
+    # 검색창 클릭
+    driver.find_element(By.XPATH, '/html/body/div[2]/div[2]/div/div[2]/ul/li[1]/button/span').click()
+
+    # input element 찾기
+    input_element = driver.find_element(By.XPATH, '/html/body/div[2]/div[2]/div/div[2]/ul/li[1]/div/form/span/input')
+
+    # '검색어' 텍스트 입력 및 제출
+    input_element.send_keys(keyword)
+    input_element.submit()
+
+    WebDriverWait(driver, 2).until(
+        expected_conditions.element_to_be_clickable((By.XPATH, '/html/body/div/div[3]/div[2]/div[5]/div[2]/a')))
+    # 커뮤니티 더보기 클릭
+    driver.find_element(By.XPATH, '/html/body/div/div[3]/div[2]/div[5]/div[2]/a').click()
+
+    # Go to page page_num
+    new_href = f"javascript:s_go('community','ALL','{page_num}');"
+    driver.execute_script(new_href)
+
+    soup = bs(driver.page_source, 'html.parser')
+
+    article = soup.select('div.search_Community ul dl')
+    texts = [i.find('dd', class_='path').text.strip().split('\n') for i in article]
+    links = [link.a['href'] for link in article]
+    boards = [i[0] for i in texts]
+    authors = [i[1] for i in texts]
+    dates = [i[2] for i in texts]
+
+    # 게시글 제목, 링크
+    # article = soup.select('div.inner_list a.article')
+    # titles = [link.text.strip() for link in article]
+    # links = [link['href'] for link in article]
+
+    posts_parsed, comments_parsed = [], []
+    # 10개의 글에 대해
+    for link, author, date in zip(links, authors, dates):
+        # 뉴스는 제외
+        if 'news' in link:
+            continue
+        print(datetime.strptime(date, '%y. %m. %d'))
+        if not timestamp_datetime_start <= datetime.strptime(date, '%y. %m. %d'):
+            continue
+        if not datetime.strptime(date, '%y. %m. %d') <= timestamp_datetime_end:
+            break
+        posts_data, comments_data = post_crawling(driver, path + link, author)
+
+        if posts_data != None:
+            posts_parsed.append(posts_data)
+        if comments_data != None:
+            comments_parsed.extend(comments_data)
+    driver.quit()
+    return {
+        "posts": posts_parsed,
+        "comments": comments_parsed
+    }
 
 
 def cmt_crawling(driver, post_id):
@@ -120,75 +187,6 @@ def post_crawling(driver, url, author):
                 comments_parsed.append(comments_data)
 
     return post_parsed, comments_parsed
-
-
-def main(event, context, driver: WebDriver):
-    # from lambda event
-    keyword = event.get('keyword', '')
-    page_num = event.get('page', '')
-    start_date_str = event.get('start_date', '2024-06-29')
-    end_date_str = event.get('end_date', '2024-07-29')
-    timestamp_datetime_start = datetime.strptime(start_date_str, '%Y-%m-%d')
-    timestamp_datetime_end = datetime.strptime(end_date_str, '%Y-%m-%d')
-
-    path = "https://www.bobaedream.co.kr/"
-    driver.get(path)
-    WebDriverWait(driver, 2).until(expected_conditions.element_to_be_clickable((By.XPATH, '/html/body/div[2]/div[2]/div/div[2]/ul/li[1]/button/span')))
-
-    # 검색창 클릭
-    driver.find_element(By.XPATH, '/html/body/div[2]/div[2]/div/div[2]/ul/li[1]/button/span').click()
-
-    # input element 찾기
-    input_element = driver.find_element(By.XPATH, '/html/body/div[2]/div[2]/div/div[2]/ul/li[1]/div/form/span/input')
-
-    # '검색어' 텍스트 입력 및 제출
-    input_element.send_keys(keyword)
-    input_element.submit()
-
-    WebDriverWait(driver, 2).until(expected_conditions.element_to_be_clickable((By.XPATH, '/html/body/div/div[3]/div[2]/div[5]/div[2]/a')))
-    # 커뮤니티 더보기 클릭
-    driver.find_element(By.XPATH, '/html/body/div/div[3]/div[2]/div[5]/div[2]/a').click()
-
-    # Go to page page_num    
-    new_href = f"javascript:s_go('community','ALL','{page_num}');"
-    driver.execute_script(new_href)
-
-    soup = bs(driver.page_source, 'html.parser')
-
-    article = soup.select('div.search_Community ul dl')
-    texts = [i.find('dd', class_='path').text.strip().split('\n') for i in article]
-    links = [link.a['href'] for link in article]
-    boards = [i[0] for i in texts]
-    authors = [i[1] for i in texts]
-    dates = [i[2] for i in texts]
-
-    # 게시글 제목, 링크
-    # article = soup.select('div.inner_list a.article')
-    # titles = [link.text.strip() for link in article]
-    # links = [link['href'] for link in article]
-
-    posts_parsed, comments_parsed = [], []
-    # 10개의 글에 대해
-    for link, author,date in zip(links, authors,dates):
-        # 뉴스는 제외
-        if 'news' in link:
-            continue
-        print(datetime.strptime(date, '%y. %m. %d'))
-        if not timestamp_datetime_start <= datetime.strptime(date, '%y. %m. %d'):
-            continue
-        if not datetime.strptime(date, '%y. %m. %d') <= timestamp_datetime_end:
-            break
-        posts_data, comments_data = post_crawling(driver, path + link, author)
-
-        if posts_data != None:
-            posts_parsed.append(posts_data)
-        if comments_data != None:
-            comments_parsed.extend(comments_data)
-    driver.quit()
-    return {
-        "posts": posts_parsed,
-        "comments": comments_parsed
-    }
 
 
 if __name__ == '__main__':
