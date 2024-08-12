@@ -94,7 +94,7 @@ def main(event, context, driver: WebDriver):
 
 
 def search_board_crawling(driver: WebDriver):
-    WebDriverWait(driver, 2).until(expected_conditions.visibility_of_element_located((By.CLASS_NAME, "subject_fixed")))
+    WebDriverWait(driver, 5).until(expected_conditions.element_to_be_clickable((By.CLASS_NAME, "subject_fixed")))
     titles_elems = driver.find_elements(By.CLASS_NAME, "subject_fixed")
     created_ats_elems = driver.find_elements(By.CLASS_NAME, "timestamp")
     authors_elems = driver.find_elements(By.CLASS_NAME, "nickname")
@@ -201,31 +201,24 @@ def clean_content(content):
 
 if __name__ == '__main__':
     from selenium import webdriver
-    import csv
+    from aws_lambda.sites.utils import save_csv
 
-    results = main({
-        "keyword": "iccu",
-        "page": 20,
-        'start_date': '2020-06-29',
-        'end_date': '2024-07-29'
-    }, {}, webdriver.Chrome())
-    posts = results["posts"]
-    comments = results["comments"]
-    # _posts를 CSV 파일로 저장
-    with open('posts.csv', mode='w', newline='', encoding='utf-8') as posts_file:
-        fieldnames = ["id", "title", "content", "likes", "url", "author", "views", "created_at", "updated_at"]
-        writer = csv.DictWriter(posts_file, fieldnames=fieldnames)
-
-        writer.writeheader()  # 헤더 작성
-        for post in posts:
-            writer.writerow(post)  # 각 포스트 데이터 작성
-    # _comments를 CSV 파일로 저장
-    with open('comments.csv', mode='w', newline='', encoding='utf-8') as comments_file:
-        fieldnames = ["post_id", "cmt_content", "cmt_author", "cmt_created_at"]
-        writer = csv.DictWriter(comments_file, fieldnames=fieldnames)
-
-        writer.writeheader()  # 헤더 작성
-        for comment in comments:
-            writer.writerow(comment)  # 각 댓글 데이터 작성
-
-    print("CSV 파일 저장 완료!")
+    payloads = [
+        {
+            "site": "clien",
+            "keyword": "코나 화재",
+            "page": i,
+            "start_date": "2019-7-26",
+            "end_date": "2024-08-30",
+        } for i in [27]
+    ]
+    for payload in payloads:
+        results = main(payload, {}, webdriver.Chrome())
+        posts = results["posts"]
+        comments = results["comments"]
+        print(f"posts {len(posts)}")
+        print(f"comments {len(comments)}")
+        keyword = payload["keyword"]
+        site = payload["site"]
+        page = payload["page"]
+        save_csv(results, f"./{keyword}/{site}", page)

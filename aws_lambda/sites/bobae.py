@@ -218,5 +218,4 @@ if __name__ == '__main__':
         keyword = payload["keyword"]
         site = payload["site"]
         page = payload["page"]
-        save_csv(posts, f"./{keyword}/{site}/posts", page)
-        save_csv(comments, f"./{keyword}/{site}/comments", page)
+        save_csv(results, f"./{keyword}/{site}",page)
