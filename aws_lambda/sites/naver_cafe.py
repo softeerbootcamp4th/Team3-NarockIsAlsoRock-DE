@@ -75,9 +75,8 @@ def comments_crawling(driver, post_id):  # 게시물 하나의 댓글들에 대�
         buttons = pages.find_elements(By.TAG_NAME, 'button')
         for index, button in enumerate(buttons[1:]):
             button.click()
-            WebDriverWait(driver, 2).until(
-                expected_conditions.element_to_be_clickable(
-                    (By.XPATH, f'//*[@id="app"]/div/div/div[2]/div[2]/div[6]/div[3]/button[{index + 1}]'))
+            WebDriverWait(driver, 5).until(
+                expected_conditions.element_to_be_clickable(buttons[index-1])
             )
             # 댓글의 다른 페이지 클릭후 변경될 때까지 대기
             WebDriverWait(driver, 10).until(expected_conditions.staleness_of(comment_box[0]))
