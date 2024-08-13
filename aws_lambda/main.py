@@ -21,14 +21,14 @@ def lambda_handler(event, context):
     site = event.get('site', '')
     keyword = event.get('keyword', '')
     page = event.get('page', 1)
-    logger.info(f"scraping start site: {site}, page: {page}, keyword: {keyword} ")
+    logger.info(f"scraping start site={site}, page={page}, keyword={keyword} ")
     try:
         result = scrap(context, event, site)
         save_result(keyword, page, result, site)
     except Exception as e:
-        logger.error(f"error site: {site}, page: {page}, keyword: {keyword}")
+        logger.error(f"error site={site}, page={page}, keyword={keyword}")
         logger.error(str(e))
-        send_slack_message(f"error site: {site}, page: {page}, keyword: {keyword}")
+        send_slack_message(f"error site={site}, page={page}, keyword={keyword}")
         raise e
 
 
@@ -47,14 +47,14 @@ def scrap(context, event, site):
         from sites import bobae
         result = bobae.main(event, context, setup_driver())
     else:
-        logger.error(f"site function not found : {site}")
+        logger.error(f"site function not found {site}")
     return result
 
 
 def save_result(keyword, page, result: Dict[str, List[Any]], site):
     # S3에 저장
     for key, value in result.items():
-        logger.info(f"saving results for {key}: {len(value)}")
+        logger.info(f"saving results for {key}={len(value)}")
         if len(value) == 0:
             continue
         save_to_s3("de3-web-scraping", f"{keyword}/{site}/{key}/{page}.csv",
