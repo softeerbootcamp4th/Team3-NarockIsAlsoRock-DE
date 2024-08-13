@@ -13,7 +13,6 @@ def invoke_lambda_function(lambda_client, payload, function_name='web-scraping',
 if __name__ == '__main__':
     # AWS Lambda 클라이언트 생성
     lambda_client = boto3.client('lambda', region_name='ap-northeast-2')
-    # 코나 화재는 40 페이지
     payloads = [
         {
             "site": "fmkorea",

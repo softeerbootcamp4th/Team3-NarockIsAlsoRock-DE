@@ -1,12 +1,15 @@
-from selenium import webdriver
-from aws_lambda.sites import naver_cafe
+from unittest import TestCase
+from aws_lambda.local.naver_cafe import divide_by_6_month
 
-if __name__ == '__main__':
-    for event in [{
-        "site": "naver_cafe",
-        "keyword": "코나 화재",
-        "page": i,
-        "start_date": "2000-01-01",
-        "end_date": "3000-12-30",
-    } for i in range(9,10)]:
-        print(naver_cafe.main(event, {}, webdriver.Chrome()))
+
+class Test(TestCase):
+    def test_divide_by_6_month(self):
+        for start_date, end_date in [["2023-01-31", "2024-08-30"], ["2021-02-01", "2024-08-30"],
+                                     ["2024-08-01", "2024-08-30"]]:
+            dates = divide_by_6_month(start_date, end_date)
+            print(dates)
+
+    def test_divide_by_6_month2(self):
+        for start_date, end_date in [["2024-07-31", "2024-08-30"]]:
+            dates = divide_by_6_month(start_date, end_date)
+            print(dates)
