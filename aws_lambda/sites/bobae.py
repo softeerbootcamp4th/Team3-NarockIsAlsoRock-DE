@@ -196,26 +196,3 @@ def post_crawling(driver, url, author):
     return post_parsed, comments_parsed
 
 
-if __name__ == '__main__':
-    from aws_lambda.sites.utils import save_csv
-    from selenium import webdriver
-
-    payloads = [
-        {
-            "site": "bobae",
-            "keyword": "코나 화재",
-            "page": i,
-            "start_date": "2019-7-26",
-            "end_date": "2024-08-30",
-        } for i in [32, 38, 12, 2, 9]
-    ]
-    for payload in payloads:
-        results = main(payload, {}, webdriver.Chrome())
-        posts = results["posts"]
-        comments = results["comments"]
-        print(f"posts {len(posts)}")
-        print(f"comments {len(comments)}")
-        keyword = payload["keyword"]
-        site = payload["site"]
-        page = payload["page"]
-        save_csv(results, f"./{keyword}/{site}",page)

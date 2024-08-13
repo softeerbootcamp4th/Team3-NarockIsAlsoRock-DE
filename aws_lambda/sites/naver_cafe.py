@@ -2,6 +2,7 @@ import re
 import time
 import urllib.parse
 from bs4 import BeautifulSoup as bs
+from selenium.common import TimeoutException
 from selenium.webdriver.chrome.webdriver import WebDriver
 from selenium.webdriver.common.by import By
 from datetime import datetime
@@ -22,16 +23,21 @@ def main(event, context, driver: WebDriver):
     driver.get("https://www.naver.com/")
     for cookie in cookies:
         driver.add_cookie(cookie)
-    driver.refresh()
-    time.sleep(2)
     search_keyword = urllib.parse.quote(keyword.encode('euc-kr'))
     board_url = f'https://cafe.naver.com/allfm01?iframe_url=/ArticleSearchList.nhn%3Fsearch.clubid=21771803%26search.media=0%26search.searchdate={start_date_str}{end_date_str}%26search.exact=%26search.include=%26userDisplay=50%26search.exclude=%26search.option=0%26search.sortBy=date%26search.searchBy=0%26search.includeAll=%26search.query={search_keyword}%26search.viewtype=title%26search.page={page_num}'
     driver.get(board_url)
     WebDriverWait(driver, 2).until(
         expected_conditions.frame_to_be_available_and_switch_to_it((By.ID, "cafe_main")))
 
-    WebDriverWait(driver, 2).until(
-        expected_conditions.element_to_be_clickable((By.CLASS_NAME, "article")))
+    try:
+        WebDriverWait(driver, 5).until(
+            expected_conditions.element_to_be_clickable((By.CLASS_NAME, "article")))
+    except TimeoutException:
+        print("Nothing to parse")
+        return {
+            "posts": [],
+            "comments": []
+        }
     soup = bs(driver.page_source, 'html.parser')
     article = soup.select('div.inner_list a.article')
     titles = [link.text.strip() for link in article]
@@ -44,7 +50,7 @@ def main(event, context, driver: WebDriver):
 
         # open post url
         driver.get(post_url)
-        WebDriverWait(driver, 2).until(
+        WebDriverWait(driver, 5).until(
             expected_conditions.frame_to_be_available_and_switch_to_it((By.ID, "cafe_main")))
 
         # 해당 페이지의 HTML 소스 가져오기, BeautifulSoup으로 HTML 파싱
@@ -94,7 +100,7 @@ def comments_crawling(driver, post_id):  # 게시물 하나의 댓글들에 대�
 
 
 def post_crawling(driver, title, url, datetime_start, datetime_end):  # 게시물 하나에 대한 크롤링
-    WebDriverWait(driver, 2).until(expected_conditions.any_of(
+    WebDriverWait(driver, 5).until(expected_conditions.any_of(
         expected_conditions.presence_of_element_located((By.CLASS_NAME, 'date')),
         expected_conditions.presence_of_element_located(
             (By.CSS_SELECTOR, "#app > div > div > div > div.guide_btns > a:nth-child(2)"))
@@ -145,73 +151,3 @@ def in_range(datetime, datetime_start, datetime_end):
 
 def clean_content(content):
     return re.sub(r'\s+', ' ', content.replace('\r\n', ' ').replace('\n', ' ')).strip()
-
-
-if __name__ == '__main__':
-    import json
-    import os
-    from selenium import webdriver
-    import csv
-
-
-    def saveCookies(driver: WebDriver):
-        # Get and store cookies after login
-        cookies = driver.get_cookies()
-
-        # Store cookies in a file
-        with open('cookies.json', 'w') as file:
-            json.dump(cookies, file)
-        print('New Cookies saved successfully')
-
-
-    def driver_naver_login(driver, login_url, id, pw):
-        driver.get(login_url)
-        time.sleep(2)
-        driver.execute_script("document.getElementsByName('id')[0].value=\'" + id + "\'")
-        driver.execute_script("document.getElementsByName('pw')[0].value=\'" + pw + "\'")
-        driver.find_element(by=By.XPATH, value='//*[@id="log.login"]').click()
-        time.sleep(1)
-        return driver
-
-
-    driver = webdriver.Chrome()
-    # info for naver login
-    login_url = 'https://nid.naver.com/nidlogin.login'
-    id_ = 'hmg_de'
-    pw = 'hmg_de_hmg_de1'
-
-    driver = driver_naver_login(driver, login_url, id_, pw)
-    saveCookies(driver)
-    driver.quit()
-
-    time.sleep(2)
-    if 'cookies.json' in os.listdir():
-        # Load cookies to a vaiable from a file
-        with open('cookies.json', 'r') as file:
-            cookies = json.load(file)
-    results = main({
-        "keyword": "iccu",
-        "page": 1,
-        'start_date': '2010-06-29',
-        'end_date': '2024-11-29',
-        'cookies': cookies
-    }, {}, webdriver.Chrome())
-    posts = results["posts"]
-    comments = results["comments"]
-    # _posts를 CSV 파일로 저장
-    with open('posts.csv', mode='w', newline='', encoding='utf-8') as posts_file:
-        fieldnames = ["id", "title", "content", "likes", "url", "author", "views", "created_at", "updated_at"]
-        writer = csv.DictWriter(posts_file, fieldnames=fieldnames)
-
-        writer.writeheader()  # 헤더 작성
-        for post in posts:
-            writer.writerow(post)  # 각 포스트 데이터 작성
-    with open('comments.csv', mode='w', newline='', encoding='utf-8') as comments_file:
-        fieldnames = ["post_id", "cmt_content", "cmt_author", "cmt_created_at"]
-        writer = csv.DictWriter(comments_file, fieldnames=fieldnames)
-
-        writer.writeheader()  # 헤더 작성
-        for comment in comments:
-            writer.writerow(comment)  # 각 댓글 데이터 작성
-
-    print("CSV 파일 저장 완료!")

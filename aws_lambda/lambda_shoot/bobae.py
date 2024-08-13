@@ -19,7 +19,7 @@ if __name__ == '__main__':
             "site": "bobae",
             "keyword": "코나 화재",
             "page": i,
-            "start_date": "2019-7-26",
+            "start_date": "2019-07-26",
             "end_date": "2024-08-30",
         } for i in range(1, 41)
     ]

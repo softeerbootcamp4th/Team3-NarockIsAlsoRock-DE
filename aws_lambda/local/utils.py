@@ -53,6 +53,7 @@ def save_csv(result, directory, page):
             os.makedirs(path)
         if len(value) == 0:
             continue
+        print(f"save {key}={len(value)}, location={path}/{page}.csv")
         # CSV 파일로 저장
         with open(f"{path}/{page}.csv", mode='w', newline='', encoding='utf-8') as comments_file:
             writer = csv.DictWriter(comments_file, fieldnames=value[0].keys())  # 헤더를 위해 필드명 설정
