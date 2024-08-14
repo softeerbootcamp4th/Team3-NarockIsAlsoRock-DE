@@ -16,11 +16,11 @@ if __name__ == '__main__':
     payloads = [
         {
             "site": "clien",
-            "keyword": "코나 화재",
+            "keyword": "벤츠 화재",
             "page": i,
-            "start_date": "2019-07-26",
+            "start_date": "2024-08-01",
             "end_date": "2024-08-30",
-        } for i in range(1, 32)
+        } for i in range(1, 37)
     ]
     for index, payload in enumerate(payloads):
         invoke_lambda_function(lambda_client, payload)
