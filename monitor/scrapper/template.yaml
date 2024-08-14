@@ -1,0 +1,54 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  python3.12
+
+  SAM Template for scrapper
+
+# More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
+Globals:
+  Function:
+    Timeout: 600
+
+Resources:
+  ScrapResults:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: de3-scrap-results
+  ScrapFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Environment:
+        Variables:
+          TZ: 'Asia/Seoul'
+      MemorySize: 1024
+      PackageType: Image
+      Policies:
+        - Statement:
+            - Effect: Allow
+              Action:
+                - s3:*
+                - s3-object-lambda:*
+              Resource: '*'
+            - Effect: Allow
+              Action:
+                - logs:CreateLogGroup
+                - logs:CreateLogStream
+                - logs:PutLogEvents
+                - s3-object-lambda:WriteGetObjectResponse
+              Resource: '*'
+      Architectures:
+        - x86_64
+      Events:
+        ScrapTriger:
+          Type: Schedule
+          Properties:
+            Schedule: rate(1 hour)
+            Name: bobae-trigger
+            Input: '{"site":"bobae"}'
+            Description: scrap trigger every hour
+            Enabled: False
+    Metadata:
+      Dockerfile: Dockerfile
+      DockerContext: ./scrapper
+      DockerTag: python3.12-v1
