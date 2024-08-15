@@ -1,0 +1,17 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+
+Description:
+  Nested stack for DE3 team project
+
+
+Resources:
+  Extract:
+    Type: AWS::Serverless::Application
+    Properties:
+      Location: extract.yaml
+  Transform:
+    Type: AWS::Serverless::Application
+    Properties:
+      Location: transform.yaml
+    DependsOn: Extract

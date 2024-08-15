@@ -13,23 +13,39 @@ The following parameters are additional parameters for the Spark job itself. Cha
 -s3://your-bucket-name/prefix/fake_sales_data.csv (Input data file in S3)
 -s3://your-bucket-name/prefix/outputs/report_1/ (Output location in S3)
 """
+import os
+
 import boto3
 
 client = boto3.client('emr')
 
 
 def lambda_handler(event, context):
+    service_role = os.environ['ServiceRole']
+    job_flow_role = os.environ['JobFlowRole']
+    ec2_subnet_id = os.environ['Ec2SubnetId']
+    s3_bucket = os.environ['S3Bucket']
+    script_path = event.get('script_path', None)
+    script_args = event.get('script_args', [])
+
+    if script_path is None:
+        return {
+            'msg' : "script path is none"
+        }
+    # PySpark 스크립트 위치 (S3 경로)
+    script_location = f's3://{s3_bucket}/{script_path}'
+
     response = client.run_job_flow(
         Name='transformer',
-        LogUri='s3://spark-transient-emr-lambda-ap-northeast-2-181252290322/prefix/logs',
-        ReleaseLabel='emr-6.0.0',
+        LogUri=f's3://{s3_bucket}/prefix/logs',
+        ReleaseLabel='emr-7.2.0',
         Instances={
-            'MasterInstanceType': 'm5.xlarge',
-            'SlaveInstanceType': 'm5.large',
-            'InstanceCount': 1,
+            'MasterInstanceType': 'm4.large',
+            'SlaveInstanceType': 'm4.large',
+            'InstanceCount': 2,
             'KeepJobFlowAliveWhenNoSteps': False,
             'TerminationProtected': False,
-            'Ec2SubnetId': 'subnet-082e8805391978904'
+            'Ec2SubnetId': ec2_subnet_id
         },
         Applications=[{'Name': 'Spark'}],
         Configurations=[
@@ -39,25 +55,19 @@ def lambda_handler(event, context):
              }
         ],
         VisibleToAllUsers=True,
-        JobFlowRole='transform-EMREC2InstanceProfile-vNruY1IWn28P',
-        ServiceRole='transform-EMRRole-r5h5GuXaDtGA',
+        JobFlowRole=job_flow_role,
+        ServiceRole=service_role,
         Steps=[
             {
-                'Name': 'flow-log-analysis',
+                'Name': 'transform',
                 'ActionOnFailure': 'TERMINATE_CLUSTER',
                 'HadoopJarStep': {
                     'Jar': 'command-runner.jar',
                     'Args': [
-                        'spark-submit',
-                        '--deploy-mode', 'cluster',
-                        '--executor-memory', '6G',
-                        '--num-executors', '1',
-                        '--executor-cores', '2',
-                        '--class', 'com.aws.emr.ProfitCalc',
-                        's3://spark-transient-emr-lambda-ap-northeast-2-181252290322/prefix/lambda-emr/SparkProfitCalc.jar',
-                        's3://spark-transient-emr-lambda-ap-northeast-2-181252290322/prefix/fake_sales_data.csv',
-                        's3://spark-transient-emr-lambda-ap-northeast-2-181252290322/prefix/outputs/report_1/'
-                    ]
+                                'spark-submit',
+                                '--deploy-mode', 'cluster',
+                                script_location
+                            ] + script_args
                 }
             }
         ]

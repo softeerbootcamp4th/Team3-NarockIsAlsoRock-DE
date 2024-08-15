@@ -3,7 +3,7 @@ Transform: AWS::Serverless-2016-10-31
 Description: >
   python3.12
 
-  SAM Template for scrapper
+  SAM Template for extract
 
 # More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
 Globals:
@@ -11,11 +11,11 @@ Globals:
     Timeout: 600
 
 Resources:
-  ScrapResults:
+  ExtractResults:
     Type: AWS::S3::Bucket
     Properties:
-      BucketName: de3-scrap-results
-  ScrapFunction:
+      BucketName: de3-extract-results
+  ExtractFunction:
     Type: AWS::Serverless::Function
     Properties:
       Environment:
@@ -40,15 +40,15 @@ Resources:
       Architectures:
         - x86_64
       Events:
-        ScrapTriger:
+        ExtractTrigger:
           Type: Schedule
           Properties:
             Schedule: rate(1 hour)
             Name: bobae-trigger
             Input: '{"site":"bobae"}'
-            Description: scrap trigger every hour
+            Description: extract trigger every hour
             Enabled: False
     Metadata:
       Dockerfile: Dockerfile
-      DockerContext: ./scrapper
+      DockerContext: ./extract
       DockerTag: python3.12-v1

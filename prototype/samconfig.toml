@@ -4,21 +4,23 @@ version = 0.1
 
 [default]
 [default.global.parameters]
-stack_name = "scrapper"
+stack_name = "de3-team-project"
 
 [default.build.parameters]
+cached = true
 parallel = true
 
 [default.validate.parameters]
 lint = true
 
 [default.deploy.parameters]
-capabilities = "CAPABILITY_IAM"
+capabilities = "CAPABILITY_IAM CAPABILITY_AUTO_EXPAND"
 confirm_changeset = true
 resolve_s3 = true
-resolve_image_repos = true
-s3_prefix = "scrapper"
+s3_prefix = "de3-team-project"
 region = "ap-northeast-2"
+parameter_overrides = "VPCName=\"EMVPC\" VpcCIDR=\"10.192.0.0/16\" PublicSubnet1CIDR=\"10.192.10.0/24\""
+image_repositories = ["Extract/ExtractFunction=181252290322.dkr.ecr.ap-northeast-2.amazonaws.com/de3teamprojectca1296b3/extractextractfunctionee74b752repo"]
 
 [default.package.parameters]
 resolve_s3 = true

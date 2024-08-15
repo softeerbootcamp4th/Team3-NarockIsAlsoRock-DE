@@ -19,7 +19,7 @@ Parameters:
     Default: 10.192.10.0/24
 
 Resources:
-  TransformerFunction:
+  TransformFunction:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: transform/
@@ -28,6 +28,12 @@ Resources:
       Architectures:
         - x86_64
       Role: !GetAtt LambdaEMRExecutionRole.Arn
+      Environment:
+        Variables:
+          ServiceRole: !Ref EMRRole
+          JobFlowRole: !Ref EMREC2InstanceProfile
+          Ec2SubnetId: !Ref PublicSubnet1
+          S3Bucket: !Ref EMRAssetsS3Bucket
 
   VPC:
     Type: AWS::EC2::VPC
