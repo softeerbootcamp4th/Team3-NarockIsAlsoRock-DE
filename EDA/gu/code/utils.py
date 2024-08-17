@@ -5,6 +5,15 @@ import matplotlib.pyplot as plt
 
 
 def filter_by_title_w_keyword(df, keywords):
+    """_summary_
+
+    Args:
+        df (pd.DataFrame): DataFrame to which filtering will be applied
+        keywords (list of str): Keywords for filtering
+
+    Returns:
+        pd.DataFrame: DataFrame filtered by title
+    """
     temp = []
     for keyword in keywords:
         temp.append(df[df.title.str.contains(keyword)])
@@ -20,6 +29,15 @@ def filter_by_title_w_keyword(df, keywords):
 
 
 def filter_by_content_w_keyword(df, keywords):
+    """_summary_
+
+    Args:
+        df (pd.DataFrame): DataFrame to which filtering will be applied
+        keywords (list of str): Keywords for filtering
+
+    Returns:
+        pd.DataFrame: DataFrame filtered by content
+    """
     temp = []
     for keyword in keywords:
         temp.append(df[df.content.str.contains(keyword).astype(bool).fillna(False)])
@@ -35,6 +53,15 @@ def filter_by_content_w_keyword(df, keywords):
 
 
 def filter_by_keyword(df, keywords):
+    """_summary_
+
+    Args:
+        df (pd.DataFrame): DataFrame to which filtering will be applied
+        keywords (list of str): Keywords for filtering
+
+    Returns:
+        pd.DataFrame: DataFrame filtered by content and title
+    """
     title_filtered_df = filter_by_title_w_keyword(df, keywords)
     content_filtered_df = filter_by_content_w_keyword(df, keywords)
     filtered_df = pd.concat(
@@ -54,13 +81,6 @@ def extract_day(datetime):
 def add_created_day_col(df):
     df["created_day"] = df.created_at.apply(extract_day)
     return df
-
-
-def filter_by_date_and_save_to_csv(df, day_start, day_end, filename):
-    temp_df = df.loc[day_start <= df["created_day"]]
-    temp_df = temp_df.loc[df["created_day"] <= day_end]
-    temp_df.to_csv(filename)
-    return temp_df
 
 
 def remove_commna(val):
@@ -88,6 +108,22 @@ def timedelta_to_seconds(timedelta):
 
 
 def plot_per_day_post_counts_with_events(df, title, day_start, day_end, events=None):
+    """_summary_
+
+    Args:
+        df (pd.DataFrame): DataFrame filtered by keywords
+        title (str): Title of the graph
+        day_start (str): Start date of the graph
+        day_end (str): End date of the graph
+        events (list of tuple(str, str, str), optional): In the case of special events,
+        display them on the graph as vertical lines. These are represented as a list of
+        tuples consisting of (date, color, event name). Defaults to None.
+
+    Functions:
+        Plot the information with counts by date on a graph.
+    Returns:
+        pd.DataFrame: DataFrame used to create the graph.
+    """
     full_date_daily = pd.date_range(start=day_start, end=day_end, freq="D").to_frame(
         index=False, name="full_range_date"
     )
@@ -114,7 +150,9 @@ def plot_per_day_post_counts_with_events(df, title, day_start, day_end, events=N
 
     fig = go.Figure()
     fig.add_trace(
-        go.Bar(x=full_range_df["full_range_date"], y=full_range_df["count"], name="count")
+        go.Bar(
+            x=full_range_df["full_range_date"], y=full_range_df["count"], name="count"
+        )
     )
 
     if events is not None:
@@ -145,16 +183,33 @@ def plot_per_day_post_counts_with_events(df, title, day_start, day_end, events=N
 def plot_per_day_target_val_sum_with_events(
     df, title, target_val, day_start, day_end, events=None
 ):
+    """_summary_
+
+    Args:
+        df (pd.DataFrame): DataFrame filtered by keywords
+        title (str): Title of the graph
+        day_start (str): Start date of the graph
+        day_end (str): End date of the graph
+        target_val (str): Selection of the column to be plotted on the graph
+        events (list of tuple(str, str, str), optional): In the case of special events,
+        display them on the graph as vertical lines. These are represented as a list of
+        tuples consisting of (date, color, event name). Defaults to None.
+
+    Functions:
+        Plot the sum of the information (selected by 'target_val') by date on a graph.
+
+    Returns:
+        pd.DataFrame: DataFrame used to create the graph
+    """
     full_date_daily = pd.date_range(start=day_start, end=day_end, freq="D").to_frame(
         index=False, name="full_range_date"
     )
     full_date_daily["full_range_date"] = full_date_daily["full_range_date"].astype(str)
 
-    # df = df.loc[df["likes"] > per_post_likes_threshold]
     df = df.loc[:, ["created_day", target_val]]
 
     per_day_view = df.groupby(df.created_day).agg(
-        {  # 일별 조회수의 합, 게시물의 수
+        {
             target_val: ["sum"],
         }
     )
