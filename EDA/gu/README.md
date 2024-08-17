@@ -66,3 +66,41 @@
 #### 결론
 - 일별 댓글 수 추이는 일별 관련 키워드가 포함된 관련 게시물의 수, 해당 게시물들의 조회 수 추이와 유사한 양상을 보인다.
 - 시간의 흐름에 따른 변화를 알 수 있는 것은 댓글 뿐이지만, 게시물의 댓글 수에 급격한 변화가 발생하는 경우 공감하는 사람들의 수가 그만큼 많다고 판단할 수 있다.
+- 사례 별, 화제성이 높았던 날의 댓글 변화 추이를 확인하여 정량화된 수치를 만들면, 새롭게 올라오는 게시물들의 댓글 변화 추이와 비교하여 모니터링이 가능하다.
+
+### 사례별 게시물 분석
+#### 벤츠 화재
+- 화제성이 증가한 날짜 및 게시물 (커뮤니티, post id, 제목, 링크)
+    - 2024.08.02 
+        1. 클리앙 (18776452), 청라 전기차 화재 주차장 수습현장 [링크](https://www.clien.net/service/board/cm_car/18776452?combine=true&q=%EB%B2%A4%EC%B8%A0+%ED%99%94%EC%9E%AC&p=3&sort=recency&boardCd=&isBoard=false)
+        2. 클리앙 (18776665), 전기차 주차 당분간은 시끄럽겠네용 [링크](https://www.clien.net/service/board/cm_car/18776665?combine=true&q=%EB%B2%A4%EC%B8%A0+%ED%99%94%EC%9E%AC&p=3&sort=recency&boardCd=&isBoard=false)
+        3. 네이버 카페 (1525144), 청라 전기차화재 관리사무소 보상안내 [링크](https://cafe.naver.com/ca-fe/ArticleRead.nhn?clubid=21771803&page=16&userDisplay=50&inCafeSearch=true&searchBy=0&query=%EB%B2%A4%EC%B8%A0+%ED%99%94%EC%9E%AC&includeAll=&exclude=&include=&exact=&searchdate=2024-08-012024-08-30&media=0&sortBy=date&articleid=1525144&referrerAllArticles=true)
+    
+#### 아이오닉 누수
+- 화제성이 증가한 날짜 및 게시물 (커뮤니티, post id, 제목, 링크)
+    - 2023.10.26
+        1. 네이버 카페 (1319521) [제보는 MBC] 빗물 유입되는 아이오닉6‥현대차 "결함 아냐" [링크](https://cafe.naver.com/ca-fe/ArticleRead.nhn?clubid=21771803&page=4&userDisplay=50&inCafeSearch=true&searchBy=0&query=%EC%95%84%EC%9D%B4%EC%98%A4%EB%8B%89+%EB%88%84%EC%88%98&includeAll=&exclude=&include=&exact=&searchdate=2023-08-312024-02-29&media=0&sortBy=date&articleid=1319521&referrerAllArticles=true)
+        2. 클리앙 (18387260) 빗물 유입되는 아이오닉6‥현대차 '결함 아냐' [링크](https://www.clien.net/service/board/park/18387260?combine=true&q=%EC%95%84%EC%9D%B4%EC%98%A4%EB%8B%89+%EB%88%84%EC%88%98&p=1&sort=recency&boardCd=&isBoard=false)
+        3. 클리앙 (18386985) 방금 mbc뉴스 아이오닉6 누수.. [링크](https://www.clien.net/service/board/park/18386985?combine=true&q=%EC%95%84%EC%9D%B4%EC%98%A4%EB%8B%89+%EB%88%84%EC%88%98&p=1&sort=recency&boardCd=&isBoard=false)
+
+#### 아이오닉 iccu
+- 화제성이 증가한 날짜 및 게시물 (커뮤니티, post id, 제목, 링크)
+    - 2024.02.20
+        1. 클리앙 (18597103) 2024 전기차 보조금 확정 [링크](https://www.clien.net/service/board/park/18597103?combine=true&q=%EC%95%84%EC%9D%B4%EC%98%A4%EB%8B%89+iccu&p=8&sort=recency&boardCd=&isBoard=false)
+        2. 클리앙 (18597684) 아이오닉5 ICCU 결함 당첨 이네요 [링크](https://www.clien.net/service/board/cm_car/18597684?combine=true&q=%EC%95%84%EC%9D%B4%EC%98%A4%EB%8B%89+iccu&p=7&sort=recency&boardCd=&isBoard=false)
+        3. 네이버 카페 (1398628) iccu 글 보자마자 제차가 똑같이 됐어요 [링크](https://cafe.naver.com/ca-fe/ArticleRead.nhn?clubid=21771803&page=2&userDisplay=50&inCafeSearch=true&searchBy=0&query=%EC%95%84%EC%9D%B4%EC%98%A4%EB%8B%89+iccu&includeAll=&exclude=&include=&exact=&searchdate=2023-08-312024-02-29&media=0&sortBy=date&articleid=1398628&referrerAllArticles=true)
+
+#### 코나 화재
+- 화제성이 증가한 날짜 및 게시물 (커뮤니티, post id, 제목, 링크)
+    - 2020.10.04
+        1. 네이버 카페 (513046) 자동차리콜센터 코나ev 결함신고 협조 요청 [링크](https://cafe.naver.com/ca-fe/ArticleRead.nhn?clubid=21771803&page=27&userDisplay=50&inCafeSearch=true&searchBy=0&query=%EC%BD%94%EB%82%98+%ED%99%94%EC%9E%AC&includeAll=&exclude=&include=&exact=&searchdate=2020-07-312021-01-31&media=0&sortBy=date&articleid=513046&referrerAllArticles=true)
+        2. 네이버 카페 (513112) 코나 내일 계약하는데ㅜ [링크](https://cafe.naver.com/ca-fe/ArticleRead.nhn?clubid=21771803&page=27&userDisplay=50&inCafeSearch=true&searchBy=0&query=%EC%BD%94%EB%82%98+%ED%99%94%EC%9E%AC&includeAll=&exclude=&include=&exact=&searchdate=2020-07-312021-01-31&media=0&sortBy=date&articleid=513112&referrerAllArticles=true)
+        3. 클리앙 (15445104) 코나 전기차, 대구서 완속충전 후 화재...벌써 12번째 [링크](https://www.clien.net/service/board/cm_car/15445104?combine=true&q=%EC%BD%94%EB%82%98+%ED%99%94%EC%9E%AC&p=25&sort=recency&boardCd=&isBoard=false)
+
+### 사례별 댓글 추이 시각화
+| |continuous (x-axis: nano second, y: number of comments) | discrete (x-axis: 30 minutes, y: number of comments)|
+|--|--|--|
+|벤츠 화재|![first](https://github.com/user-attachments/assets/22f33706-a26d-4d20-a07d-9871576e9b50)|![first](https://github.com/user-attachments/assets/ecf5b98e-ed05-4408-b45c-0d48d4d50fb2)|
+|아이오닉 누수|![first](https://github.com/user-attachments/assets/33c26949-3d25-4a57-9f39-fb11cc12e56d)|![first](https://github.com/user-attachments/assets/b7e8d233-0281-4270-bae9-6d13f11e4b0f)|
+|아이오닉 iccu|![first](https://github.com/user-attachments/assets/9d21457c-9700-4546-9efc-1acda4066148)|![first](https://github.com/user-attachments/assets/9ccdd16b-1000-4e61-8426-306c3c3c6ca2)|
+|코나|![first](https://github.com/user-attachments/assets/b0662d39-7941-4145-8ff5-92816b74212a)|![first](https://github.com/user-attachments/assets/01c44408-ffdb-48e1-b6a3-f6ccb20a7878)|
