@@ -26,42 +26,42 @@
 #### 벤츠 화재
 - 일자 별 댓글 수 추이
 ![number_of_comments](https://github.com/user-attachments/assets/b27bb594-9bde-46f7-8e9e-0d13524bc6c6)
-- 일자 별 좋아요 수 추이
-![number_of_likes](https://github.com/user-attachments/assets/537518eb-4f9e-4c7d-adab-3edfd7cd21de)
 - 일자 별 게시물 수 추이
 ![number_of_posts](https://github.com/user-attachments/assets/5612b55e-610f-41ef-bb69-40e54a3a2c37)
 - 일자 별 조회 수 추이
 ![number_of_views](https://github.com/user-attachments/assets/989892a0-170d-4282-9bff-94bb2817e0bc)
+- 일자 별 좋아요 수 추이
+![number_of_likes](https://github.com/user-attachments/assets/537518eb-4f9e-4c7d-adab-3edfd7cd21de)
 
 #### 아이오닉 누수
 - 일자 별 댓글 수 추이
 ![number_of_comments](https://github.com/user-attachments/assets/a2e777d1-09e4-447e-adc4-4a9aea0f2ad5)
-- 일자 별 좋아요 수 추이
-![number_of_likes](https://github.com/user-attachments/assets/66fe35a2-0cfa-458c-bd6d-f1f076fa0d3b)
 - 일자 별 게시물 수 추이
 ![number_of_posts](https://github.com/user-attachments/assets/37507730-b4cb-4216-be59-af2d5e67e2f3)
 - 일자 별 조회 수 추이
 ![number_of_views](https://github.com/user-attachments/assets/6cfebae4-3488-4e76-b033-14c5483debbd)
+- 일자 별 좋아요 수 추이
+![number_of_likes](https://github.com/user-attachments/assets/66fe35a2-0cfa-458c-bd6d-f1f076fa0d3b)
 
 #### 아이오닉 iccu
 - 일자 별 댓글 수 추이
 ![number_of_comments](https://github.com/user-attachments/assets/1dedb9e1-e914-4530-8997-1e337b96a45f)
-- 일자 별 좋아요 수 추이
-![number_of_likes](https://github.com/user-attachments/assets/b74dcf6c-4679-4f65-82bb-09b6b6ab0363)
 - 일자 별 게시물 수 추이
 ![number_of_posts](https://github.com/user-attachments/assets/2000a0f2-1de2-40e0-8d33-44750283e2b3)
 - 일자 별 조회 수 추이
 ![number_of_views](https://github.com/user-attachments/assets/4b125dc2-c34d-418c-a851-fe35cd506354)
+- 일자 별 좋아요 수 추이
+![number_of_likes](https://github.com/user-attachments/assets/b74dcf6c-4679-4f65-82bb-09b6b6ab0363)
 
 #### 코나 화재
 - 일자 별 댓글 수 추이
 ![number_of_comments](https://github.com/user-attachments/assets/0660b99a-65e9-4225-8be6-2217aa2f5b03)
-- 일자 별 좋아요 수 추이
-![number_of_likes](https://github.com/user-attachments/assets/cb8bbe2c-0d8f-4011-b877-56505f6cf6eb)
 - 일자 별 게시물 수 추이
 ![number_of_posts](https://github.com/user-attachments/assets/04707d75-19d9-4c4a-bd31-ca8b362225ab)
 - 일자 별 조회 수 추이
 ![number_of_views](https://github.com/user-attachments/assets/4a8ce368-5ab8-4de7-8380-38ee9dfb153f)
+- 일자 별 좋아요 수 추이
+![number_of_likes](https://github.com/user-attachments/assets/cb8bbe2c-0d8f-4011-b877-56505f6cf6eb)
 
 #### 결론
 - 일별 댓글 수 추이는 일별 관련 키워드가 포함된 관련 게시물의 수, 해당 게시물들의 조회 수 추이와 유사한 양상을 보인다.
@@ -98,7 +98,7 @@
         3. 클리앙 (15445104) 코나 전기차, 대구서 완속충전 후 화재...벌써 12번째 [링크](https://www.clien.net/service/board/cm_car/15445104?combine=true&q=%EC%BD%94%EB%82%98+%ED%99%94%EC%9E%AC&p=25&sort=recency&boardCd=&isBoard=false)
 
 ### 사례별 댓글 추이 시각화
-| |continuous (x-axis: nano second, y: number of comments) | discrete (x-axis: 30 minutes, y: number of comments)|
+| |continuous (x-axis: nanosecond, y: number of comments) | discrete (x-axis: 30 minutes, y: number of comments)|
 |--|--|--|
 |벤츠 화재|![first](https://github.com/user-attachments/assets/22f33706-a26d-4d20-a07d-9871576e9b50)|![first](https://github.com/user-attachments/assets/ecf5b98e-ed05-4408-b45c-0d48d4d50fb2)|
 |아이오닉 누수|![first](https://github.com/user-attachments/assets/33c26949-3d25-4a57-9f39-fb11cc12e56d)|![first](https://github.com/user-attachments/assets/b7e8d233-0281-4270-bae9-6d13f11e4b0f)|
