@@ -40,29 +40,42 @@ def divide_by_6_month(start_date="2020-01-01", end_date="2024-06-30"):
 
 
 def scrap(start_date, end_date, keyword, cookies):
+    processes = []
+
     for start, end in divide_by_6_month(start_date=start_date, end_date=end_date):
-        payload = {
-            "site": "naver_cafe",
-            "keyword": keyword,
-            "start_date": start,
-            "end_date": end,
-            "cookies": cookies,
-        }
-        for i in range(1, 42):
-            try:
-                payload['page'] = i
-                print(f"start site={payload['site']}, keyword={payload['keyword']}, page={payload['page']}")
-                results = naver_cafe.main(payload, {}, setup_headless_driver())
-                if len(results['posts']) == 0:
-                    print(f"scrap done. site={payload['site']}, keyword={keyword}, page={i}")
-                    break
-                keyword = payload["keyword"]
-                site = payload["site"]
-                page = payload["page"]
-                save_csv(results, f"{keyword}/{site}/{start}", page)
-            except Exception as e:
-                print(f"error parsing site={payload['site']}, page={payload['page']}")
-                traceback.print_exc()  # 전체 스택 트레이스를 출력
+        p = multiprocessing.Process(target=scarp_date_range, args=(cookies,end,keyword,start))
+        time.sleep(5)
+        processes.append(p)
+        p.start()
+
+    for p in processes:
+        p.join()  # 모든 프로세스가 끝날 때까지 기다림
+
+
+
+def scarp_date_range(cookies, end, keyword, start):
+    payload = {
+        "site": "naver_cafe",
+        "keyword": keyword,
+        "start_date": start,
+        "end_date": end,
+        "cookies": cookies,
+    }
+    for i in range(1, 42):
+        try:
+            payload['page'] = i
+            print(f"start payload={payload}")
+            results = naver_cafe.main(payload, {}, setup_headless_driver())
+            if len(results['posts']) == 0:
+                print(f"scrap done. site={payload['site']}, keyword={keyword}, page={i}")
+                break
+            keyword = payload["keyword"]
+            site = payload["site"]
+            page = payload["page"]
+            save_csv(results, f"{keyword}/{site}/{start}", page)
+        except Exception as e:
+            print(f"error parsing site={payload['site']}, page={payload['page']}")
+            traceback.print_exc()  # 전체 스택 트레이스를 출력
 
 
 if __name__ == '__main__':
@@ -81,9 +94,9 @@ if __name__ == '__main__':
     processes = []
 
     for i in [
-        ("2024-01-31", "2024-08-30", "코나 화재", cookies),
+        ("2019-7-26", "2024-08-30", "코나 화재", cookies),
             # ("2021-02-01", "2024-08-30", "아이오닉 iccu", cookies),
-            # ("2024-07-31", "2024-08-30", "아이오닉 누수", cookies),
+            # ("2023-01-01", "2024-08-30", "아이오닉 누수", cookies),
             # ("2024-08-01", "2024-08-30", "벤츠 화재", cookies)
     ]:
         p = multiprocessing.Process(target=scrap, args=(i[0],i[1],i[2],i[3]))
