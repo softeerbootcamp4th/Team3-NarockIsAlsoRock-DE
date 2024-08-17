@@ -83,6 +83,10 @@ def convert_str_to_float(val):
     return val
 
 
+def timedelta_to_seconds(timedelta):
+    return timedelta.seconds
+
+
 def plot_per_day_post_counts_with_events(df, title, day_start, day_end, events=None):
     full_date_daily = pd.date_range(start=day_start, end=day_end, freq="D").to_frame(
         index=False, name="full_range_date"
