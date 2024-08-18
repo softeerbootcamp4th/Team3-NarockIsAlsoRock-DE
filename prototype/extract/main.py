@@ -48,7 +48,9 @@ def scrap(context, event, site):
         from sites import bobae
         result = bobae.main(event, context, setup_driver())
     else:
-        logger.error(f"site function not found {site}")
+        error_message = f"Site function not found: {site}"
+        logger.error(error_message)
+        raise ValueError(error_message)
     return result
 
 
