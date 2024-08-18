@@ -114,14 +114,14 @@
 - 화제성 있는 게시물의 기준은, 전체 데이터를 기준으로 조회수 상위 3% 이상 또는 댓글 수 상위 3% 이상인 게시물로 한다.
 - 화제성이 있는 게시물(hot post)과 그렇지 않은 게시물(cold post)의 시간의 흐름에 따른 댓글 수 변화에 대한 통계를 기반으로, curve fitting을 진행한다.
 
-| |Hot Posts| Cold Posts|
-|--|--|--|
-||![distirib_of_num_of_cmt_hot](https://github.com/user-attachments/assets/8cea6824-7f56-40a0-977c-f8c4ed551c0e)| ![distirib_of_num_of_cmt_cold](https://github.com/user-attachments/assets/01bf2c7e-9dc5-49c3-8903-f1c1335227a4)|
-| |![distirib_of_num_of_cmt_hot_with_pred](https://github.com/user-attachments/assets/7560ff7b-0dc6-4968-9bec-ec81a18d4ae6)|![distirib_of_num_of_cmt_cold_with_pred](https://github.com/user-attachments/assets/de2efc0e-7fcc-4cb3-9369-1e6039b4fb4a)| 
+|Hot Posts| Cold Posts|
+|--|--|
+|![distirib_of_num_of_cmt_hot](https://github.com/user-attachments/assets/8cea6824-7f56-40a0-977c-f8c4ed551c0e)| ![distirib_of_num_of_cmt_cold](https://github.com/user-attachments/assets/01bf2c7e-9dc5-49c3-8903-f1c1335227a4)|
+|![distirib_of_num_of_cmt_hot_with_pred](https://github.com/user-attachments/assets/7560ff7b-0dc6-4968-9bec-ec81a18d4ae6)|![distirib_of_num_of_cmt_cold_with_pred](https://github.com/user-attachments/assets/de2efc0e-7fcc-4cb3-9369-1e6039b4fb4a)| 
 
 - Estimated function
     > Hot Posts: 6.27 * exp(-0.50 * (x - 1.57)) + 1.31   
     > Cold Post: 0.20 * exp(-0.89 * (x - 3.69)) + 0.18
 
-- 새롭게 모니터링하는 게시물의 작성 시간과 댓글의 작성 시간을 기반으로, 해당 게시물의 댓글 반응 양상이 hot post와 유사한지, cold post와 유사한지를 기반으로 게시물의 영향력을 판단한다.
+- 새롭게 모니터링하는 게시물의 작성 시간과 댓글의 작성 시간을 기반으로, 해당 게시물의 댓글 반응 양상이 hot post와 유사한지, cold post와 유사한지를 기반으로 게시물의 영향력을 판단한다.   
 ![final](https://github.com/user-attachments/assets/870588f6-dd08-46ee-aa69-a790093aaf90)
