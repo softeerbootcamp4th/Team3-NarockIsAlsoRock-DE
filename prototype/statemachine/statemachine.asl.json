@@ -1,0 +1,28 @@
+{
+  "Comment": "StateMachine to run multiple ExtractFunctions and then TransformFunction",
+  "StartAt": "RunExtractFunctions",
+  "States": {
+    "RunExtractFunctions": {
+      "Type": "Map",
+      "InputPath" : "$",
+      "ItemsPath": "$.extractPayloads",
+      "MaxConcurrency": 4,
+      "Iterator": {
+        "StartAt": "ExtractStep",
+        "States": {
+          "ExtractStep": {
+            "Type": "Task",
+            "Resource": "${ExtractFunctionArn}",
+            "End": true
+          }
+        }
+      },
+      "Next": "TransformStep"
+    },
+    "TransformStep": {
+      "Type": "Task",
+      "Resource": "${TransformFunctionArn}",
+      "End": true
+    }
+  }
+}
