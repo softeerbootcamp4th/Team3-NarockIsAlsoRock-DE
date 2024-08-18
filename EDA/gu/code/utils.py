@@ -253,3 +253,7 @@ def plot_per_day_target_val_sum_with_events(
 
     fig.show()
     return full_range_df
+
+
+def get_target_val_by_percent(df, target, percent):
+    return int(df[target].quantile(percent))
