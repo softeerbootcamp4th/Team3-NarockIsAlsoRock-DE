@@ -229,3 +229,9 @@ Outputs:
   S3Bucket:
     Description: S3 bucket for EMR
     Value: !Ref EMRAssetsS3Bucket
+
+  TransformFunctionArn:
+    Description: ARN of the Transform Lambda function
+    Value: !GetAtt TransformFunction.Arn
+    Export:
+      Name: TransformFunctionArn
