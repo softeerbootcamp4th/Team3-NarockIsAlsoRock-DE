@@ -235,3 +235,18 @@ Outputs:
     Value: !GetAtt TransformFunction.Arn
     Export:
       Name: TransformFunctionArn
+
+  SecurityGroupId:
+    Value: !Ref SecurityGroup
+    Export:
+      Name: SecurityGroupId
+
+  VPCId:
+    Value: !Ref VPC
+    Export:
+      Name: VPCId
+
+  PublicRouteTableId:
+    Value: !Ref PublicRouteTable
+    Export:
+      Name: PublicRouteTableId

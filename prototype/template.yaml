@@ -4,7 +4,6 @@ Transform: AWS::Serverless-2016-10-31
 Description:
   Nested stack for DE3 team project
 
-
 Resources:
   Extract:
     Type: AWS::Serverless::Application
@@ -15,6 +14,12 @@ Resources:
     Properties:
       Location: transform.yaml
     DependsOn: Extract
+  Load:
+    Type: AWS::Serverless::Application
+    Properties:
+      Location: load.yaml
+    DependsOn: Transform
+
   StateMachine:
     Type: AWS::Serverless::StateMachine # More info about State Machine Resource: https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-resource-statemachine.html
     Properties:
@@ -54,4 +59,5 @@ Resources:
                 Resource:
                   - !ImportValue ExtractFunctionArn
                   - !ImportValue TransformFunctionArn
-    DependsOn: Transform
+    DependsOn: Load
+

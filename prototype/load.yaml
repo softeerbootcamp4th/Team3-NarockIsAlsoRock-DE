@@ -1,0 +1,79 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+
+Description:
+  Load stack for DE3 team project
+
+Parameters:
+  RedshiftPublicSubnet1CIDR:
+    Description: IP range (CIDR notation) for the RedshiftPublicSubnet
+    Type: String
+    Default: 10.192.7.0/24
+
+  RedshiftPublicSubnet2CIDR:
+    Description: IP range (CIDR notation) for the RedshiftPublicSubnet
+    Type: String
+    Default: 10.192.8.0/24
+
+  RedshiftPublicSubnet3CIDR:
+    Description: IP range (CIDR notation) for the RedshiftPublicSubnet
+    Type: String
+    Default: 10.192.9.0/24
+
+Resources:
+  RedshiftPublicSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !ImportValue VPCId
+      AvailabilityZone: !Select [ 1, !GetAZs '' ]
+      CidrBlock: !Ref RedshiftPublicSubnet1CIDR
+      MapPublicIpOnLaunch: true
+  RedshiftPublicSubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !ImportValue VPCId
+      AvailabilityZone: !Select [ 2, !GetAZs '' ]
+      CidrBlock: !Ref RedshiftPublicSubnet2CIDR
+      MapPublicIpOnLaunch: true
+  RedshiftPublicSubnet3:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !ImportValue VPCId
+      AvailabilityZone: !Select [ 3, !GetAZs '' ]
+      CidrBlock: !Ref RedshiftPublicSubnet3CIDR
+      MapPublicIpOnLaunch: true
+  RedshiftPublicSubnet1RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !ImportValue PublicRouteTableId
+      SubnetId: !Ref RedshiftPublicSubnet1
+  RedshiftPublicSubnet2RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !ImportValue PublicRouteTableId
+      SubnetId: !Ref RedshiftPublicSubnet2
+  RedshiftPublicSubnet3RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !ImportValue PublicRouteTableId
+      SubnetId: !Ref RedshiftPublicSubnet3
+  RedshiftServerlessNamespace:
+    Type: AWS::RedshiftServerless::Namespace
+    Properties:
+      NamespaceName: de3-namespace
+      DbName: dev
+      AdminUsername: hmgtest
+      AdminUserPassword: HMGtest1234
+  RedshiftServerlessWorkgroup:
+    Type: AWS::RedshiftServerless::Workgroup
+    Properties:
+      WorkgroupName: de3-workgroup
+      NamespaceName: !Ref RedshiftServerlessNamespace
+      BaseCapacity: 32
+      PubliclyAccessible: true
+      SubnetIds:
+        - !Ref RedshiftPublicSubnet1
+        - !Ref RedshiftPublicSubnet2
+        - !Ref RedshiftPublicSubnet3
+      SecurityGroupIds:
+        - !ImportValue SecurityGroupId
