@@ -2,7 +2,8 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 import matplotlib.pyplot as plt
-
+import numpy as np
+import scipy.stats as stats
 
 def filter_by_title_w_keyword(df, keywords):
     """_summary_
@@ -257,3 +258,29 @@ def plot_per_day_target_val_sum_with_events(
 
 def get_target_val_by_percent(df, target, percent):
     return int(df[target].quantile(percent))
+
+
+def visualize_model(hot_df, cold_df, time_interval):
+    hot_model_interval_df = hot_df[hot_df['relative_time']<=time_interval].groupby('id').agg(['count'])
+    hot_model_interval_df.columns = hot_model_interval_df.columns.droplevel(0)
+    hot_model_interval_df.columns = ['count']
+
+    cold_model_interval_df = cold_df[cold_df['relative_time']<=time_interval].groupby('id').agg(['count'])
+    cold_model_interval_df.columns = cold_model_interval_df.columns.droplevel(0)
+    cold_model_interval_df.columns = ['count']
+
+    x_values = np.linspace(0, 201, 200)
+
+    mean_hot = hot_model_interval_df['count'].mean()
+    std_hot = hot_model_interval_df['count'].std()
+    hot_pdf_values = stats.norm.pdf(x_values, mean_hot, std_hot)
+
+    mean_cold = cold_model_interval_df['count'].mean()
+    std_cold = cold_model_interval_df['count'].std()
+    cold_pdf_values = stats.norm.pdf(x_values, mean_cold, std_cold)
+
+    plt.plot(x_values, cold_pdf_values, color='blue', label='cold post')
+    plt.plot(x_values, hot_pdf_values, color='red', label='hot post')
+    plt.title(f"PDF of cumulative number of comments. Time ({time_interval*5}~{(time_interval+1)*5 -1} minutes)")
+    plt.legend()
+    plt.show()
