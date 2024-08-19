@@ -10,11 +10,11 @@ manifest_hash = ""
 packagetype = "Zip"
 functions = ["Transform/TransformFunction"]
 
-[function_build_definitions.78e3c970-1836-4e11-b1d0-64af5e12efdd]
+[function_build_definitions.36fc5432-033c-477d-bc69-ffbad77a6a09]
 packagetype = "Image"
 functions = ["Extract/ExtractFunction"]
 
-[function_build_definitions.78e3c970-1836-4e11-b1d0-64af5e12efdd.metadata]
+[function_build_definitions.36fc5432-033c-477d-bc69-ffbad77a6a09.metadata]
 Dockerfile = "Dockerfile"
 DockerContext = "/Users/admin/PycharmProjects/softeer-team-project/prototype/extract"
 DockerTag = "python3.12-v1"

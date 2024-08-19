@@ -69,18 +69,6 @@ Resources:
         - Key: Name
           Value: !Sub ${VPCName} Public Subnet
 
-#  NatGatewayEIP:
-#    Type: AWS::EC2::EIP
-#    DependsOn: InternetGatewayAttachment
-#    Properties:
-#      Domain: vpc
-#
-#  NatGateway:
-#    Type: AWS::EC2::NatGateway
-#    Properties:
-#      AllocationId: !GetAtt NatGatewayEIP.AllocationId
-#      SubnetId: !Ref PublicSubnet1
-
   PublicRouteTable:
     Type: AWS::EC2::RouteTable
     Properties:

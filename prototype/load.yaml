@@ -20,6 +20,11 @@ Parameters:
     Type: String
     Default: 10.192.9.0/24
 
+  LocalIp:
+    Type: String
+    Description: Your local IP address in CIDR notation.
+    Default: 119.66.150.75/32
+
 Resources:
   RedshiftPublicSubnet1:
     Type: AWS::EC2::Subnet
@@ -57,6 +62,15 @@ Resources:
     Properties:
       RouteTableId: !ImportValue PublicRouteTableId
       SubnetId: !Ref RedshiftPublicSubnet3
+  RedshiftSecurityGroupIngress:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !ImportValue SecurityGroupId
+      IpProtocol: tcp
+      FromPort: 5439
+      ToPort: 5439
+      CidrIp: !Ref LocalIp
+
   RedshiftServerlessNamespace:
     Type: AWS::RedshiftServerless::Namespace
     Properties:
