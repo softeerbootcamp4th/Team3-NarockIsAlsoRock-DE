@@ -125,3 +125,4 @@
 
 - 새롭게 모니터링하는 게시물의 작성 시간과 댓글의 작성 시간을 기반으로, 해당 게시물의 댓글 반응 양상이 hot post와 유사한지, cold post와 유사한지를 기반으로 게시물의 영향력을 판단한다.   
 ![final](https://github.com/user-attachments/assets/870588f6-dd08-46ee-aa69-a790093aaf90)
+

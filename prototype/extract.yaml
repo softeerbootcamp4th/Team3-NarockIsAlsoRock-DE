@@ -52,3 +52,10 @@ Resources:
       Dockerfile: Dockerfile
       DockerContext: ./extract
       DockerTag: python3.12-v1
+
+Outputs:
+  ExtractFunctionArn:
+    Description: ARN of the Extract Lambda function
+    Value: !GetAtt ExtractFunction.Arn
+    Export:
+      Name: ExtractFunctionArn
