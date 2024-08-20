@@ -11,7 +11,7 @@ Resources:
       DefinitionSubstitutions:
         ExtractFunctionArn: !ImportValue ExtractFunctionArn
         EMRAssetsS3BucketName: !ImportValue EMRAssetsS3BucketName
-        EMRServerlessJobExecutionRole: !Ref EMRServerlessJobExecutionRole
+        EMRServerlessJobExecutionRole: !GetAtt EMRServerlessJobExecutionRole.Arn
       Events:
         HourlyTradingSchedule:
           Type: Schedule # More info about Schedule Event Source: https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-property-statemachine-schedule.html
