@@ -25,7 +25,7 @@
       "Parameters": {
         "Name": "TransformServerlessEMR",
         "Type": "SPARK",
-        "ReleaseLabel": "emr-7.2.0",
+        "ReleaseLabel": "emr-6.15.0",
         "InitialCapacity": {
           "DRIVER": {
             "WorkerConfiguration": {
@@ -43,24 +43,15 @@
             },
             "WorkerCount": 2
           }
-        },
-        "Catch": [
-          {
-            "ErrorEquals": [
-              "States.ALL"
-            ],
-            "Next": "Stop Application"
-          }
-        ]
+        }
       },
-      "Next": "Start Application",
-      "ResultPath": "$.ApplicationDetails"
+      "Next": "Start Application"
     },
     "Start Application": {
       "Type": "Task",
       "Resource": "arn:aws:states:::emr-serverless:startApplication.sync",
       "Parameters": {
-        "ApplicationId.$": "$.ApplicationDetails.ApplicationId"
+        "ApplicationId.$": "$.ApplicationId"
       },
       "Next": "Run job",
       "ResultPath": null,
@@ -69,6 +60,8 @@
           "ErrorEquals": [
             "States.ALL"
           ],
+          "ResultPath": "$.error-info",
+
           "Next": "Stop Application"
         }
       ]
@@ -77,7 +70,7 @@
       "Type": "Task",
       "Resource": "arn:aws:states:::emr-serverless:startJobRun.sync",
       "Parameters": {
-        "ApplicationId.$": "$.ApplicationDetails.ApplicationId",
+        "ApplicationId.$": "$.ApplicationId",
         "ExecutionRoleArn": "arn:aws:iam::181252290322:role/de3-team-project-StepFunc-EMRServerlessJobExecution-A3UeyuleUjiN",
         "JobDriver": {
           "SparkSubmit": {
@@ -94,6 +87,8 @@
           "ErrorEquals": [
             "States.ALL"
           ],
+          "ResultPath": "$.error-info",
+
           "Next": "Stop Application"
         }
       ]
@@ -102,7 +97,7 @@
       "Type": "Task",
       "Resource": "arn:aws:states:::emr-serverless:stopApplication.sync",
       "Parameters": {
-        "ApplicationId.$": "$.ApplicationDetails.ApplicationId"
+        "ApplicationId.$": "$.ApplicationId"
       },
       "End": true
     }
