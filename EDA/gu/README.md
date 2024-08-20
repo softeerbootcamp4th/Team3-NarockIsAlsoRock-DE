@@ -104,3 +104,25 @@
 |아이오닉 누수|![first](https://github.com/user-attachments/assets/33c26949-3d25-4a57-9f39-fb11cc12e56d)|![first](https://github.com/user-attachments/assets/b7e8d233-0281-4270-bae9-6d13f11e4b0f)|
 |아이오닉 iccu|![first](https://github.com/user-attachments/assets/9d21457c-9700-4546-9efc-1acda4066148)|![first](https://github.com/user-attachments/assets/9ccdd16b-1000-4e61-8426-306c3c3c6ca2)|
 |코나|![first](https://github.com/user-attachments/assets/b0662d39-7941-4145-8ff5-92816b74212a)|![first](https://github.com/user-attachments/assets/01c44408-ffdb-48e1-b6a3-f6ccb20a7878)|
+
+## Modeling
+| 모든 그래프에서, x-axis의 unit은 30분이다.
+
+- SNS에서 크롤링한 데이터에서 얻을 수 있는 정보는 다양하지만, 시간의 흐름에 따른 반응을 볼 수 있는 것은 댓글 밖에 없다.
+- EDA를 통해 댓글 수와 조회수 사이에 큰 상관관계가 있음을 확인했으므로, 댓글 수의 변화를 통해 화제성을 추정할 수 있다고 가정한다.
+- 기존의 사례들을 기반으로 크롤링한 데이터를, 화제성 있는 게시물과 그렇지 않은 게시물로 구분한다.
+- 화제성 있는 게시물의 기준은, 전체 데이터를 기준으로 조회수 상위 3% 이상 또는 댓글 수 상위 3% 이상인 게시물로 한다.
+- 화제성이 있는 게시물(hot post)과 그렇지 않은 게시물(cold post)의 시간의 흐름에 따른 댓글 수 변화에 대한 통계를 기반으로, curve fitting을 진행한다.
+
+|Hot Posts| Cold Posts|
+|--|--|
+|![distirib_of_num_of_cmt_hot](https://github.com/user-attachments/assets/8cea6824-7f56-40a0-977c-f8c4ed551c0e)| ![distirib_of_num_of_cmt_cold](https://github.com/user-attachments/assets/01bf2c7e-9dc5-49c3-8903-f1c1335227a4)|
+|![distirib_of_num_of_cmt_hot_with_pred](https://github.com/user-attachments/assets/7560ff7b-0dc6-4968-9bec-ec81a18d4ae6)|![distirib_of_num_of_cmt_cold_with_pred](https://github.com/user-attachments/assets/de2efc0e-7fcc-4cb3-9369-1e6039b4fb4a)| 
+
+- Estimated function
+    > Hot Posts: 6.27 * exp(-0.50 * (x - 1.57)) + 1.31   
+    > Cold Post: 0.20 * exp(-0.89 * (x - 3.69)) + 0.18
+
+- 새롭게 모니터링하는 게시물의 작성 시간과 댓글의 작성 시간을 기반으로, 해당 게시물의 댓글 반응 양상이 hot post와 유사한지, cold post와 유사한지를 기반으로 게시물의 영향력을 판단한다.   
+![final](https://github.com/user-attachments/assets/870588f6-dd08-46ee-aa69-a790093aaf90)
+
