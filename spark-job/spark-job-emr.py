@@ -11,10 +11,10 @@ from pyspark.sql.types import StructType, StructField, IntegerType, FloatType, D
 ps.set_option('compute.ops_on_diff_frames', True)
 
 # from S3, to S3 (To be updated)
-POSTS_FP = "s3://de3-extract-results/clien_posts.csv"  # 크롤링 결과 파일 위치 
-COMMENT_FP = "s3://de3-extract-results/clien_comments.csv"  # 크롤링 결과 파일 위치
-MODEL_FP = "s3://de3-extract-results/model_result.csv" # from RedShift
-OUTPUT_FP = "s3://de3-extract-results/transform_output"  # to RedShift
+POST_FP = "s3://emr-temp-resource/clien_posts.csv"  # 크롤링 결과 파일 위치
+COMMENT_FP = "s3://emr-temp-resource/clien_comments.csv"  # 크롤링 결과 파일 위치
+MODEL_FP = "s3://emr-temp-resource/model_result.csv" # from RedShift
+OUTPUT_FP = "s3://emr-temp-resource/transform_output"  # to RedShift
 
 
 def find_hot_criteria(row, model_df):
