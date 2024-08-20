@@ -54,7 +54,8 @@
       "Parameters": {
         "ApplicationId.$": "$.ApplicationDetails.ApplicationId"
       },
-      "Next": "Run job"
+      "Next": "Run job",
+      "ResultPath": null
     },
     "Run job": {
       "Type": "Task",
@@ -70,7 +71,8 @@
           }
         }
       },
-      "Next": "Stop Application"
+      "Next": "Stop Application",
+      "ResultPath": null
     },
     "Stop Application": {
       "Type": "Task",
