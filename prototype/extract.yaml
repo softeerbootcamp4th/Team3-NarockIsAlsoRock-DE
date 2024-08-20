@@ -23,7 +23,7 @@ Resources:
       Environment:
         Variables:
           TZ: 'Asia/Seoul'
-      MemorySize: 1024
+      MemorySize: 2048
       PackageType: Image
       Policies:
         - Statement:
