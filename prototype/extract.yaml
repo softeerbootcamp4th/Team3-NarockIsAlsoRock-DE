@@ -11,10 +11,12 @@ Globals:
     Timeout: 600
 
 Resources:
+
   ExtractResults:
     Type: AWS::S3::Bucket
     Properties:
-      BucketName: de3-extract-results
+      BucketName: de3-extract
+
   ExtractFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -39,15 +41,6 @@ Resources:
               Resource: '*'
       Architectures:
         - x86_64
-      Events:
-        ExtractTrigger:
-          Type: Schedule
-          Properties:
-            Schedule: rate(1 hour)
-            Name: bobae-trigger
-            Input: '{"site":"bobae"}'
-            Description: extract trigger every hour
-            Enabled: False
     Metadata:
       Dockerfile: Dockerfile
       DockerContext: ./extract
