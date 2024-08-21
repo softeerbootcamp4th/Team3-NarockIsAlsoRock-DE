@@ -25,23 +25,33 @@
       "Parameters": {
         "Name": "TransformServerlessEMR",
         "Type": "SPARK",
+        "NetworkConfiguration": {
+          "SecurityGroupIds": [
+            "${SecurityGroupId}"
+          ],
+          "SubnetIds": [
+            "${ServerlessEMRPrivateSubnet1Id}",
+            "${ServerlessEMRPrivateSubnet2Id}",
+            "${ServerlessEMRPrivateSubnet3Id}"
+          ]
+        },
         "ReleaseLabel": "emr-6.15.0",
         "InitialCapacity": {
           "DRIVER": {
             "WorkerConfiguration": {
-              "Cpu": "2",
-              "Memory": "8",
+              "Cpu": "1",
+              "Memory": "4",
               "Disk": "20gb"
             },
             "WorkerCount": 1
           },
           "EXECUTOR": {
             "WorkerConfiguration": {
-              "Cpu": "2",
-              "Memory": "8",
+              "Cpu": "1",
+              "Memory": "4",
               "Disk": "20gb"
             },
-            "WorkerCount": 2
+            "WorkerCount": 1
           }
         }
       },
@@ -61,7 +71,6 @@
             "States.ALL"
           ],
           "ResultPath": "$.error-info",
-
           "Next": "Stop Application"
         }
       ]
@@ -88,7 +97,6 @@
             "States.ALL"
           ],
           "ResultPath": "$.error-info",
-
           "Next": "Stop Application"
         }
       ]

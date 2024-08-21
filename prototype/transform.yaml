@@ -2,6 +2,23 @@ AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 Description:
   This template deploys VPC and the required roles and to run the EMR cluster.
+
+Parameters:
+  ServerlessEMRPrivateSubnet1CIDR:
+    Description: IP range (CIDR notation) for the ServerlessEMRPrivateSubnet
+    Type: String
+    Default: 10.192.50.0/24
+
+  ServerlessEMRPrivateSubnet2CIDR:
+    Description: IP range (CIDR notation) for the ServerlessEMRPrivateSubnet
+    Type: String
+    Default: 10.192.60.0/24
+
+  ServerlessEMRPrivateSubnet3CIDR:
+    Description: IP range (CIDR notation) for the ServerlessEMRPrivateSubnet
+    Type: String
+    Default: 10.192.70.0/24
+
 Resources:
   EMRAssetsS3Bucket:
     Type: 'AWS::S3::Bucket'
@@ -34,6 +51,77 @@ Resources:
                   - /*
         Version: 2012-10-17
 
+  ServerlessEMRPrivateSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !ImportValue VPCId
+      AvailabilityZone: !Select [ 0, !GetAZs '' ]
+      CidrBlock: !Ref ServerlessEMRPrivateSubnet1CIDR
+      MapPublicIpOnLaunch: false
+
+  ServerlessEMRPrivateSubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !ImportValue VPCId
+      AvailabilityZone: !Select [ 1, !GetAZs '' ]
+      CidrBlock: !Ref ServerlessEMRPrivateSubnet2CIDR
+      MapPublicIpOnLaunch: false
+
+  ServerlessEMRPrivateSubnet3:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !ImportValue VPCId
+      AvailabilityZone: !Select [ 2, !GetAZs '' ]
+      CidrBlock: !Ref ServerlessEMRPrivateSubnet3CIDR
+      MapPublicIpOnLaunch: false
+
+  PrivateRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !ImportValue VPCId
+
+  EMRAssetsS3BucketEndpoint:
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      ServiceName: com.amazonaws.ap-northeast-2.s3
+      VpcId: !ImportValue VPCId
+      VpcEndpointType: Gateway
+      RouteTableIds:
+        - !Ref PrivateRouteTable
+
+  SecretsManagerEndpoint:
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      ServiceName: com.amazonaws.ap-northeast-2.secretsmanager
+      VpcId: !ImportValue VPCId
+      VpcEndpointType: Interface
+      PrivateDnsEnabled: true
+      SecurityGroupIds:
+        - !ImportValue SecurityGroupId
+      # TODO: check if only 1 subnet is ok
+      SubnetIds:
+        - !Ref ServerlessEMRPrivateSubnet1
+        - !Ref ServerlessEMRPrivateSubnet2
+        - !Ref ServerlessEMRPrivateSubnet3
+
+  ServerlessEMRPrivateSubnet1RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PrivateRouteTable
+      SubnetId: !Ref ServerlessEMRPrivateSubnet1
+
+  ServerlessEMRPrivateSubnet2RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PrivateRouteTable
+      SubnetId: !Ref ServerlessEMRPrivateSubnet2
+
+  ServerlessEMRPrivateSubnet3RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PrivateRouteTable
+      SubnetId: !Ref ServerlessEMRPrivateSubnet3
+
 Outputs:
   EMRAssetsS3BucketName:
     Description: S3 bucket for EMR
@@ -41,3 +129,17 @@ Outputs:
     Export:
       Name: EMRAssetsS3BucketName
 
+  ServerlessEMRPrivateSubnet1Id:
+    Value: !Ref ServerlessEMRPrivateSubnet1
+    Export:
+      Name: ServerlessEMRPrivateSubnet1Id
+
+  ServerlessEMRPrivateSubnet2Id:
+    Value: !Ref ServerlessEMRPrivateSubnet2
+    Export:
+      Name: ServerlessEMRPrivateSubnet2Id
+
+  ServerlessEMRPrivateSubnet3Id:
+    Value: !Ref ServerlessEMRPrivateSubnet3
+    Export:
+      Name: ServerlessEMRPrivateSubnet3Id

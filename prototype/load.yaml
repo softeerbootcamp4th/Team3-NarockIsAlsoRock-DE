@@ -15,11 +15,6 @@ Parameters:
     Type: String
     Default: 10.192.0.0/16
 
-  PublicSubnet1CIDR:
-    Description: IP range (CIDR notation) for the public subnet
-    Type: String
-    Default: 10.192.10.0/24
-
   RedshiftPublicSubnet1CIDR:
     Description: IP range (CIDR notation) for the RedshiftPublicSubnet
     Type: String
@@ -38,7 +33,7 @@ Parameters:
   LocalIp:
     Type: String
     Description: Your local IP address in CIDR notation.
-    Default: 175.196.82.2/32
+    Default: 183.101.248.104/32
 
 Resources:
   VPC:
@@ -64,17 +59,6 @@ Resources:
       InternetGatewayId: !Ref InternetGateway
       VpcId: !Ref VPC
 
-  PublicSubnet1:
-    Type: AWS::EC2::Subnet
-    Properties:
-      VpcId: !Ref VPC
-      AvailabilityZone: !Select [ 0, !GetAZs '' ]
-      CidrBlock: !Ref PublicSubnet1CIDR
-      MapPublicIpOnLaunch: true
-      Tags:
-        - Key: Name
-          Value: !Sub ${VPCName} Public Subnet
-
   PublicRouteTable:
     Type: AWS::EC2::RouteTable
     Properties:
@@ -91,12 +75,6 @@ Resources:
       DestinationCidrBlock: 0.0.0.0/0
       GatewayId: !Ref InternetGateway
 
-  PublicSubnet1RouteTableAssociation:
-    Type: AWS::EC2::SubnetRouteTableAssociation
-    Properties:
-      RouteTableId: !Ref PublicRouteTable
-      SubnetId: !Ref PublicSubnet1
-
   SecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
@@ -110,48 +88,6 @@ Resources:
       IpProtocol: '-1'
       SourceSecurityGroupId: !Ref SecurityGroup
 
-  SecurityGroupEgress:
-    Type: 'AWS::EC2::SecurityGroupEgress'
-    Properties:
-      GroupId: !GetAtt SecurityGroup.GroupId
-      IpProtocol: '-1'
-      CidrIp: 0.0.0.0/0
-  RedshiftPublicSubnet1:
-    Type: AWS::EC2::Subnet
-    Properties:
-      VpcId: !Ref VPC
-      AvailabilityZone: !Select [ 1, !GetAZs '' ]
-      CidrBlock: !Ref RedshiftPublicSubnet1CIDR
-      MapPublicIpOnLaunch: true
-  RedshiftPublicSubnet2:
-    Type: AWS::EC2::Subnet
-    Properties:
-      VpcId: !Ref VPC
-      AvailabilityZone: !Select [ 2, !GetAZs '' ]
-      CidrBlock: !Ref RedshiftPublicSubnet2CIDR
-      MapPublicIpOnLaunch: true
-  RedshiftPublicSubnet3:
-    Type: AWS::EC2::Subnet
-    Properties:
-      VpcId: !Ref VPC
-      AvailabilityZone: !Select [ 3, !GetAZs '' ]
-      CidrBlock: !Ref RedshiftPublicSubnet3CIDR
-      MapPublicIpOnLaunch: true
-  RedshiftPublicSubnet1RouteTableAssociation:
-    Type: AWS::EC2::SubnetRouteTableAssociation
-    Properties:
-      RouteTableId: !Ref PublicRouteTable
-      SubnetId: !Ref RedshiftPublicSubnet1
-  RedshiftPublicSubnet2RouteTableAssociation:
-    Type: AWS::EC2::SubnetRouteTableAssociation
-    Properties:
-      RouteTableId: !Ref PublicRouteTable
-      SubnetId: !Ref RedshiftPublicSubnet2
-  RedshiftPublicSubnet3RouteTableAssociation:
-    Type: AWS::EC2::SubnetRouteTableAssociation
-    Properties:
-      RouteTableId: !Ref PublicRouteTable
-      SubnetId: !Ref RedshiftPublicSubnet3
   RedshiftSecurityGroupIngress:
     Type: AWS::EC2::SecurityGroupIngress
     Properties:
@@ -161,13 +97,93 @@ Resources:
       ToPort: 5439
       CidrIp: !Ref LocalIp
 
+  RedshiftSecurityGroupIngress2:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !Ref SecurityGroup
+      IpProtocol: tcp
+      FromPort: 0
+      ToPort: 65535
+      CidrIp: '18.176.203.96/28'
+
+  SecurityGroupEgress:
+    Type: 'AWS::EC2::SecurityGroupEgress'
+    Properties:
+      GroupId: !GetAtt SecurityGroup.GroupId
+      IpProtocol: '-1'
+      CidrIp: 0.0.0.0/0
+
+  RedshiftPublicSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: !Select [ 1, !GetAZs '' ]
+      CidrBlock: !Ref RedshiftPublicSubnet1CIDR
+      MapPublicIpOnLaunch: true
+
+  RedshiftPublicSubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: !Select [ 2, !GetAZs '' ]
+      CidrBlock: !Ref RedshiftPublicSubnet2CIDR
+      MapPublicIpOnLaunch: true
+
+  RedshiftPublicSubnet3:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: !Select [ 3, !GetAZs '' ]
+      CidrBlock: !Ref RedshiftPublicSubnet3CIDR
+      MapPublicIpOnLaunch: true
+
+  RedshiftPublicSubnet1RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      SubnetId: !Ref RedshiftPublicSubnet1
+
+  RedshiftPublicSubnet2RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      SubnetId: !Ref RedshiftPublicSubnet2
+
+  RedshiftPublicSubnet3RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      SubnetId: !Ref RedshiftPublicSubnet3
+
+  RedshiftDefaultRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Action:
+              - 'sts:AssumeRole'
+            Effect: Allow
+            Principal:
+              Service:
+                - 'redshift.amazonaws.com'
+                - 'redshift-serverless.amazonaws.com'
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonRedshiftFullAccess
+        - arn:aws:iam::aws:policy/AmazonS3FullAccess
+
+
   RedshiftServerlessNamespace:
     Type: AWS::RedshiftServerless::Namespace
     Properties:
       NamespaceName: de3-namespace
       DbName: dev
-      AdminUsername: hmgtest
-      AdminUserPassword: HMGtest1234
+      AdminUsername: '{{resolve:secretsmanager:hmg-4th-de3-redshift-admin-credential:SecretString:redshift_user}}'
+      AdminUserPassword: '{{resolve:secretsmanager:hmg-4th-de3-redshift-admin-credential:SecretString:redshift_password}}'
+      DefaultIamRoleArn: !GetAtt RedshiftDefaultRole.Arn
+      IamRoles:
+        - !GetAtt RedshiftDefaultRole.Arn
+
   RedshiftServerlessWorkgroup:
     Type: AWS::RedshiftServerless::Workgroup
     Properties:
@@ -175,28 +191,36 @@ Resources:
       NamespaceName: !Ref RedshiftServerlessNamespace
       BaseCapacity: 32
       PubliclyAccessible: true
+      EnhancedVpcRouting: true
       SubnetIds:
         - !Ref RedshiftPublicSubnet1
         - !Ref RedshiftPublicSubnet2
         - !Ref RedshiftPublicSubnet3
       SecurityGroupIds:
         - !Ref SecurityGroup
-#Outputs:
-#  Ec2SubnetId:
-#    Description: Private subnet ID for EMR
-#    Value: !Ref PublicSubnet1
-#
-#  SecurityGroupId:
-#    Value: !Ref SecurityGroup
-#    Export:
-#      Name: SecurityGroupId
-#
-#  VPCId:
-#    Value: !Ref VPC
-#    Export:
-#      Name: VPCId
-#
-#  PublicRouteTableId:
-#    Value: !Ref PublicRouteTable
-#    Export:
-#      Name: PublicRouteTableId
+
+Outputs:
+  VPCId:
+    Value: !Ref VPC
+    Export:
+      Name: VPCId
+
+  SecurityGroupId:
+    Value: !Ref SecurityGroup
+    Export:
+      Name: SecurityGroupId
+
+  RedshiftPublicSubnet1Id:
+    Value: !Ref RedshiftPublicSubnet1
+    Export:
+      Name: RedshiftPublicSubnet1Id
+
+  RedshiftPublicSubnet2d:
+    Value: !Ref RedshiftPublicSubnet2
+    Export:
+      Name: RedshiftPublicSubnet2Id
+
+  RedshiftPublicSubnet3Id:
+    Value: !Ref RedshiftPublicSubnet3
+    Export:
+      Name: RedshiftPublicSubnet3Id

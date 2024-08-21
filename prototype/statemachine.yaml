@@ -12,6 +12,10 @@ Resources:
         ExtractFunctionArn: !ImportValue ExtractFunctionArn
         EMRAssetsS3BucketName: !ImportValue EMRAssetsS3BucketName
         EMRServerlessJobExecutionRole: !GetAtt EMRServerlessJobExecutionRole.Arn
+        SecurityGroupId: !ImportValue SecurityGroupId
+        ServerlessEMRPrivateSubnet1Id: !ImportValue ServerlessEMRPrivateSubnet1Id
+        ServerlessEMRPrivateSubnet2Id: !ImportValue ServerlessEMRPrivateSubnet2Id
+        ServerlessEMRPrivateSubnet3Id: !ImportValue ServerlessEMRPrivateSubnet3Id
       Events:
         HourlyTradingSchedule:
           Type: Schedule # More info about Schedule Event Source: https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-property-statemachine-schedule.html
@@ -71,6 +75,15 @@ Resources:
                   - 'events:PutRule'
                   - 'events:DescribeRule'
                 Resource: !Sub "arn:${AWS::Partition}:events:*:*:rule/StepFunctionsGetEventsForEMRServerlessJobRule"
+              - Effect: Allow
+                Sid: AllowEC2ENICreationWithEMRTags
+                Action:
+                  - 'ec2:CreateNetworkInterface'
+                Resource:
+                  - '*'
+                Condition:
+                  StringEquals:
+                    aws:CalledViaLast: "ops.emr-serverless.amazonaws.com"
         - PolicyName: "StateMachineExecutionPolicy"
           PolicyDocument:
             Version: "2012-10-17"
@@ -132,3 +145,14 @@ Resources:
                   - 'glue:GetUserDefinedFunctions'
                 Resource:
                   - '*'
+              - Effect: Allow
+                Action:
+                  - 'redshift:GetClusterCredentials'
+                  - 'redshift:DescribeCluster'
+                  - 'redshift-serverless:GetCredentials'
+                  - 'redshift-serverless:GetWorkgroup'
+                Resource:
+                  - '*'
+      # TODO: SecretsManager read is enough
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/SecretsManagerReadWrite
