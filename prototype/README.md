@@ -120,7 +120,7 @@ transform$ AWS_SAM_STACK_NAME="transform" python -m pytest tests/integration -v
 To delete the sample application that you created, use the AWS CLI. Assuming you used your project name for the stack name, you can run the following:
 
 ```bash
-sam delete --stack-name "transform"
+sam delete --stack-name "de3-team-project"
 ```
 
 ## Resources

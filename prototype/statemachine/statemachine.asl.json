@@ -1,0 +1,105 @@
+{
+  "Comment": "StateMachine to run multiple ExtractFunctions and then TransformFunction",
+  "StartAt": "RunExtractFunctions",
+  "States": {
+    "RunExtractFunctions": {
+      "Type": "Map",
+      "InputPath": "$",
+      "ItemsPath": "$.extractPayloads",
+      "MaxConcurrency": 4,
+      "Iterator": {
+        "StartAt": "ExtractStep",
+        "States": {
+          "ExtractStep": {
+            "Type": "Task",
+            "Resource": "arn:aws:lambda:ap-northeast-2:181252290322:function:de3-team-project-Extract-LI4LUEKZ6-ExtractFunction-ZCGBca0zSiJY",
+            "End": true
+          }
+        }
+      },
+      "Next": "TransformStep"
+    },
+    "TransformStep": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::emr-serverless:createApplication.sync",
+      "Parameters": {
+        "Name": "TransformServerlessEMR",
+        "Type": "SPARK",
+        "ReleaseLabel": "emr-6.15.0",
+        "InitialCapacity": {
+          "DRIVER": {
+            "WorkerConfiguration": {
+              "Cpu": "2",
+              "Memory": "8",
+              "Disk": "20gb"
+            },
+            "WorkerCount": 1
+          },
+          "EXECUTOR": {
+            "WorkerConfiguration": {
+              "Cpu": "2",
+              "Memory": "8",
+              "Disk": "20gb"
+            },
+            "WorkerCount": 2
+          }
+        }
+      },
+      "Next": "Start Application"
+    },
+    "Start Application": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::emr-serverless:startApplication.sync",
+      "Parameters": {
+        "ApplicationId.$": "$.ApplicationId"
+      },
+      "Next": "Run job",
+      "ResultPath": null,
+      "Catch": [
+        {
+          "ErrorEquals": [
+            "States.ALL"
+          ],
+          "ResultPath": "$.error-info",
+
+          "Next": "Stop Application"
+        }
+      ]
+    },
+    "Run job": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::emr-serverless:startJobRun.sync",
+      "Parameters": {
+        "ApplicationId.$": "$.ApplicationId",
+        "ExecutionRoleArn": "arn:aws:iam::181252290322:role/de3-team-project-StepFunc-EMRServerlessJobExecution-A3UeyuleUjiN",
+        "JobDriver": {
+          "SparkSubmit": {
+            "EntryPoint": "s3://spark-transient-emr-lambda-ap-northeast-2-181252290322/code/pyspark/spark-job-emr.py",
+            "EntryPointArguments": [],
+            "SparkSubmitParameters": "--conf spark.hadoop.hive.metastore.client.factory.class=com.amazonaws.glue.catalog.metastore.AWSGlueDataCatalogHiveClientFactory"
+          }
+        }
+      },
+      "Next": "Stop Application",
+      "ResultPath": null,
+      "Catch": [
+        {
+          "ErrorEquals": [
+            "States.ALL"
+          ],
+          "ResultPath": "$.error-info",
+
+          "Next": "Stop Application"
+        }
+      ]
+    },
+    "Stop Application": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::emr-serverless:stopApplication.sync",
+      "Parameters": {
+        "ApplicationId.$": "$.ApplicationId"
+      },
+      "End": true
+    }
+  }
+}

@@ -4,7 +4,6 @@ Transform: AWS::Serverless-2016-10-31
 Description:
   Nested stack for DE3 team project
 
-
 Resources:
   Extract:
     Type: AWS::Serverless::Application
@@ -15,3 +14,13 @@ Resources:
     Properties:
       Location: transform.yaml
     DependsOn: Extract
+  Load:
+    Type: AWS::Serverless::Application
+    Properties:
+      Location: load.yaml
+    DependsOn: Transform
+  StepFunction:
+    Type: AWS::Serverless::Application
+    Properties:
+      Location: statemachine.yaml
+    DependsOn: Load

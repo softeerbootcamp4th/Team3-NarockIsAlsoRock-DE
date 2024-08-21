@@ -1,0 +1,134 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description:
+  This template deploys Statemachine
+
+Resources:
+  StateMachine:
+    Type: AWS::Serverless::StateMachine # More info about State Machine Resource: https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-resource-statemachine.html
+    Properties:
+      DefinitionUri: statemachine/statemachine.asl.json
+      DefinitionSubstitutions:
+        ExtractFunctionArn: !ImportValue ExtractFunctionArn
+        EMRAssetsS3BucketName: !ImportValue EMRAssetsS3BucketName
+        EMRServerlessJobExecutionRole: !GetAtt EMRServerlessJobExecutionRole.Arn
+      Events:
+        HourlyTradingSchedule:
+          Type: Schedule # More info about Schedule Event Source: https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-property-statemachine-schedule.html
+          Properties:
+            Description: Schedule to run the state machine every hour
+            Enabled: false
+            Schedule: rate(1 hour)
+            Input: '{"extractPayloads": [{"site": "bobae1"}, {"site": "bobae2"}, {"site": "bobae3"}, {"site": "bobae4"}]}'
+      Role: !GetAtt StateMachineExecutionRole.Arn
+
+  StateMachineExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - "states.amazonaws.com"
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: StatesExecutionPolicy
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - iam:PassRole
+                Resource:
+                  - !GetAtt EMRServerlessJobExecutionRole.Arn
+              - Effect: Allow
+                Action:
+                  - 'emr-serverless:CreateApplication'
+                  - 'emr-serverless:StartApplication'
+                  - 'emr-serverless:StopApplication'
+                  - 'emr-serverless:GetApplication'
+                  - 'emr-serverless:DeleteApplication'
+                  - 'emr-serverless:StartJobRun'
+                  - 'emr-serverless:CancelJobRun'
+                  - 'emr-serverless:GetJobRun'
+                Resource: !Sub "arn:${AWS::Partition}:emr-serverless:*:*:/*"
+              - Effect: Allow
+                Action:
+                  - 'iam:CreateServiceLinkedRole'
+                  - 'iam:PutRolePolicy'
+                Resource: !Sub "arn:${AWS::Partition}:iam::*:role/aws-service-role/ops.emr-serverless.amazonaws.com/AWSServiceRoleForAmazonEMRServerless*"
+              - Effect: Allow
+                Action:
+                  - 'events:PutTargets'
+                  - 'events:PutRule'
+                  - 'events:DescribeRule'
+                Resource: !Sub "arn:${AWS::Partition}:events:*:*:rule/StepFunctionsGetEventsForEMRServerlessApplicationRule"
+              - Effect: Allow
+                Action:
+                  - 'events:PutTargets'
+                  - 'events:PutRule'
+                  - 'events:DescribeRule'
+                Resource: !Sub "arn:${AWS::Partition}:events:*:*:rule/StepFunctionsGetEventsForEMRServerlessJobRule"
+        - PolicyName: "StateMachineExecutionPolicy"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: "Allow"
+                Action:
+                  - "lambda:InvokeFunction"
+                Resource:
+                  - !ImportValue ExtractFunctionArn
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonS3FullAccess
+
+  EMRServerlessJobExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Action:
+              - 'sts:AssumeRole'
+            Effect: Allow
+            Principal:
+              Service:
+                - 'emr-serverless.amazonaws.com'
+      Policies:
+        - PolicyName: EMRServerlessS3AndGlueAccessPolicy
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 's3:GetObject'
+                  - 's3:ListBucket'
+                Resource:
+                  - !Sub "arn:${AWS::Partition}:s3:::*.elasticmapreduce"
+                  - !Sub "arn:${AWS::Partition}:s3:::*.elasticmapreduce/*"
+              - Effect: Allow
+                Action:
+                  - 's3:PutObject'
+                  - 's3:GetObject'
+                  - 's3:ListBucket'
+                  - 's3:DeleteObject'
+                Resource:
+                  - "*"
+              - Effect: Allow
+                Action:
+                  - 'glue:GetDatabase'
+                  - 'glue:CreateDatabase'
+                  - 'glue:GetDatabases'
+                  - 'glue:CreateTable'
+                  - 'glue:GetTable'
+                  - 'glue:UpdateTable'
+                  - 'glue:DeleteTable'
+                  - 'glue:GetTables'
+                  - 'glue:GetPartition'
+                  - 'glue:GetPartitions'
+                  - 'glue:CreatePartition'
+                  - 'glue:BatchCreatePartition'
+                  - 'glue:GetUserDefinedFunctions'
+                Resource:
+                  - '*'

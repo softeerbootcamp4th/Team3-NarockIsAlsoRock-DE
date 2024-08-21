@@ -19,7 +19,6 @@ confirm_changeset = true
 resolve_s3 = true
 s3_prefix = "de3-team-project"
 region = "ap-northeast-2"
-parameter_overrides = "VPCName=\"EMVPC\" VpcCIDR=\"10.192.0.0/16\" PublicSubnet1CIDR=\"10.192.10.0/24\""
 image_repositories = ["Extract/ExtractFunction=181252290322.dkr.ecr.ap-northeast-2.amazonaws.com/de3teamprojectca1296b3/extractextractfunctionee74b752repo"]
 
 [default.package.parameters]
