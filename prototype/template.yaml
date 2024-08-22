@@ -4,7 +4,6 @@ Transform: AWS::Serverless-2016-10-31
 Description:
   Nested stack for DE3 team project
 
-
 Resources:
   Extract:
     Type: AWS::Serverless::Application
@@ -15,43 +14,13 @@ Resources:
     Properties:
       Location: transform.yaml
     DependsOn: Extract
-  StateMachine:
-    Type: AWS::Serverless::StateMachine # More info about State Machine Resource: https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-resource-statemachine.html
+  Load:
+    Type: AWS::Serverless::Application
     Properties:
-      DefinitionUri: statemachine/statemachine.asl.json
-      DefinitionSubstitutions:
-        ExtractFunctionArn: !ImportValue ExtractFunctionArn
-        TransformFunctionArn: !ImportValue TransformFunctionArn
-      Events:
-        HourlyTradingSchedule:
-          Type: Schedule # More info about Schedule Event Source: https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-property-statemachine-schedule.html
-          Properties:
-            Description: Schedule to run the state machine every hour
-            Enabled: false
-            Schedule: rate(1 hour)
-            Input: '{"extractPayloads": [{"site": "bobae1"}, {"site": "bobae2"}, {"site": "bobae3"}, {"site": "bobae4"}]}'
-      Role: !GetAtt StateMachineExecutionRole.Arn
+      Location: load.yaml
     DependsOn: Transform
-  StateMachineExecutionRole:
-    Type: AWS::IAM::Role
+  StepFunction:
+    Type: AWS::Serverless::Application
     Properties:
-      AssumeRolePolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-          - Effect: "Allow"
-            Principal:
-              Service:
-                - "states.amazonaws.com"
-            Action: "sts:AssumeRole"
-      Policies:
-        - PolicyName: "StateMachineExecutionPolicy"
-          PolicyDocument:
-            Version: "2012-10-17"
-            Statement:
-              - Effect: "Allow"
-                Action:
-                  - "lambda:InvokeFunction"
-                Resource:
-                  - !ImportValue ExtractFunctionArn
-                  - !ImportValue TransformFunctionArn
-    DependsOn: Transform
+      Location: statemachine.yaml
+    DependsOn: Load

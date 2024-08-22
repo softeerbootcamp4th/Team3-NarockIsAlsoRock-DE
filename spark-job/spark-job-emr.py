@@ -10,11 +10,12 @@ from pyspark.sql.types import StructType, StructField, IntegerType, FloatType, D
 
 ps.set_option('compute.ops_on_diff_frames', True)
 
-# TODO: load model from RedShift, save result to RedShifts
+# from S3, to S3 (To be updated)
 POST_FP = "s3://emr-temp-resource/clien_posts.csv"  # 크롤링 결과 파일 위치
 COMMENT_FP = "s3://emr-temp-resource/clien_comments.csv"  # 크롤링 결과 파일 위치
 MODEL_FP = "s3://emr-temp-resource/model_result.csv" # from RedShift
 OUTPUT_FP = "s3://emr-temp-resource/transform_output"  # to RedShift
+
 MAX_COMMENTS_NUM = 200
 TIME_INTERVAL = 5 * 60 # seconds 
 
@@ -51,7 +52,7 @@ def set_to_nearest_half_hour():
         collected_at = collected_at.replace(minute=00)
     return collected_at
 
-
+  
 def parse_date(date_str):
     return ps.to_datetime(date_str, errors="coerce")
 
@@ -72,7 +73,6 @@ if __name__ == "__main__":
     comment_df['cmt_created_at'] = comment_df['cmt_created_at'].apply(parse_date)
     model_df['pdf'] = model_df['pdf'].astype(float)
     model_df['cumulative_num'] = model_df['cumulative_num'].astype(int)
-    model_df['post_type'] = model_df['post_type'].astype(int)
     model_df['post_type'] = model_df['post_type'].astype(int)
     
     # get number of comments per post

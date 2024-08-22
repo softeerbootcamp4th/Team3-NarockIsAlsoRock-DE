@@ -60,7 +60,7 @@ def save_result(result: Dict[str, List[Any]], site, current_time: datetime):
         logger.info(f"saving results for {key}={len(value)}")
         if len(value) == 0:
             continue
-        save_to_s3("de3-scrap-results",
+        save_to_s3("de3-extract",
                    f"{site}/{current_time.strftime("%Y-%m-%d")}/{key}/{current_time.strftime("%H:%M")}.csv",
                    value)
 
