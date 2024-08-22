@@ -19,8 +19,13 @@ Resources:
     Properties:
       Location: load.yaml
     DependsOn: Transform
+  Alarm:
+    Type: AWS::Serverless::Application
+    Properties:
+      Location: alarm.yaml
+    DependsOn: Load
   StepFunction:
     Type: AWS::Serverless::Application
     Properties:
       Location: statemachine.yaml
-    DependsOn: Load
+    DependsOn: Alarm

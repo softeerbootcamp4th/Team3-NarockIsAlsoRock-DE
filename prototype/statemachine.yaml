@@ -16,14 +16,15 @@ Resources:
         ServerlessEMRPrivateSubnet1Id: !ImportValue ServerlessEMRPrivateSubnet1Id
         ServerlessEMRPrivateSubnet2Id: !ImportValue ServerlessEMRPrivateSubnet2Id
         ServerlessEMRPrivateSubnet3Id: !ImportValue ServerlessEMRPrivateSubnet3Id
+        SlackAlertFunctionArn: !ImportValue SlackAlertFunctionArn
       Events:
         HourlyTradingSchedule:
           Type: Schedule # More info about Schedule Event Source: https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-property-statemachine-schedule.html
           Properties:
             Description: Schedule to run the state machine every hour
-            Enabled: false
-            Schedule: rate(1 hour)
-            Input: '{"extractPayloads": [{"site": "bobae1"}, {"site": "bobae2"}, {"site": "bobae3"}, {"site": "bobae4"}]}'
+            Enabled: true
+            Schedule: rate(30 minutes)
+            Input: '{"extractPayloads": [{"site": "bobae"}]}'
       Role: !GetAtt StateMachineExecutionRole.Arn
 
   StateMachineExecutionRole:
