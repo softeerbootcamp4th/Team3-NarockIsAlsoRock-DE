@@ -17,7 +17,7 @@ TIME_INTERVAL = 5 * 60  # seconds
 
 def find_hot_criteria(row, model_df):
     condition = ((model_df['post_type'] == 1) \
-                 & (model_df['relative_time'] == row.relatvie_time) \
+                 & (model_df['relative_time'] == row.relative_time) \
                  & (model_df['cumulative_num'] == row.comments))
     hot_pdf_value = model_df[condition].pdf.values[0]
     return hot_pdf_value
@@ -25,7 +25,7 @@ def find_hot_criteria(row, model_df):
 
 def find_cold_criteria(row, model_df):
     condition = ((model_df['post_type'] == 0) \
-                 & (model_df['relative_time'] == row.relatvie_time) \
+                 & (model_df['relative_time'] == row.relative_time) \
                  & (model_df['cumulative_num'] == row.comments))
     hot_pdf_value = model_df[condition].pdf.values[0]
     return hot_pdf_value
@@ -177,8 +177,8 @@ if __name__ == "__main__":
     post_df['comments'] = post_df['comments'].fillna(0)
 
     post_df = post_df.drop(columns=['id', 'updated_at', 'content'])
-    post_df['relatvie_time'] = ((collected_at - post_df['created_at']) // TIME_INTERVAL) * 5
-    post_df = post_df[post_df['relatvie_time'] >= 0]
+    post_df['relative_time'] = ((collected_at - post_df['created_at']) // TIME_INTERVAL) * 5
+    post_df = post_df[post_df['relative_time'] >= 0]
     post_df = predict_post_type(post_df, model_df)
     post_df['sns_id'] = 0  # TODO: use sns_id from input data. (to be deleted)
     post_df['collected_at'] = collected_at
@@ -197,9 +197,9 @@ if __name__ == "__main__":
         FROM post
         WHERE created_at >= DATEADD('month', -1, CURRENT_DATE)
     )
-    SELECT *
+    SELECT title, likes, url, author, views, created_at, post_id, comments, relative_time, impact, post_type, sns_id, collected_at, batch_id
     FROM ranked_posts
-    WHERE rn = 1
+    WHERE rn = 1    
     """
     view_df = read_redshift(spark, "post", db_user, db_password, query)
     write_redshift(view_df.to_spark(), 'view', db_user, db_password)
