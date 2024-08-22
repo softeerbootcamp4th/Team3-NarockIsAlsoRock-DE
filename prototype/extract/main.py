@@ -21,15 +21,21 @@ SLACK_WEBHOOK_PATH = '/services/T070MKQ7CJY/B07G10BC7U3/nRkzmVy5QIxTxwgWvc1R6i4x
 
 def lambda_handler(event, context):
     site = event.get('site', '')
-    current_time = datetime.now()
+    current_time = set_to_nearest_half_hour()
     logger.info(f"scraping start site={site}, time={current_time}")
     try:
         result = scrap(context, event, site)
         save_result(result, site, current_time)
+        return {
+            "batch_id": current_time.strftime('%Y%m%d%H%M')
+        }
     except Exception as e:
         logger.error(f"error site={site}, time={current_time}")
         logger.error(str(e))
-        send_slack_message(f"error site={site}, time={current_time}")
+        region = os.environ['AWS_REGION']
+        log_group_name = context.log_group_name
+        cloudwatch_url = f"https://{region}.console.aws.amazon.com/cloudwatch/home?region={region}#logsV2:log-groups/log-group/{log_group_name}"
+        send_slack_message(f"error site={site}, time={current_time}, cloudwatch_url={cloudwatch_url}")
         raise e
 
 
@@ -54,6 +60,15 @@ def scrap(context, event, site):
     return result
 
 
+def set_to_nearest_half_hour():
+    collected_at = datetime.now().replace(second=0, microsecond=0)
+    if collected_at.minute >= 30:
+        collected_at = collected_at.replace(minute=30)
+    else:
+        collected_at = collected_at.replace(minute=00)
+    return collected_at
+
+
 def save_result(result: Dict[str, List[Any]], site, current_time: datetime):
     # S3에 저장
     for key, value in result.items():
@@ -61,7 +76,7 @@ def save_result(result: Dict[str, List[Any]], site, current_time: datetime):
         if len(value) == 0:
             continue
         save_to_s3("de3-extract",
-                   f"{site}/{current_time.strftime("%Y-%m-%d")}/{key}/{current_time.strftime("%H:%M")}.csv",
+                   f"{site}/{current_time.strftime("%Y-%m-%d")}/{key}/{current_time.strftime('%Y%m%d%H%M')}.csv",
                    value)
 
 

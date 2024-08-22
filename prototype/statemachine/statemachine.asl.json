@@ -6,6 +6,7 @@
       "Type": "Map",
       "InputPath": "$",
       "ItemsPath": "$.extractPayloads",
+      "ResultPath": "$.mapResult",
       "MaxConcurrency": 4,
       "Iterator": {
         "StartAt": "ExtractStep",
@@ -55,13 +56,14 @@
           }
         }
       },
-      "Next": "Start Application"
+      "Next": "Start Application",
+      "ResultPath": "$.Application"
     },
     "Start Application": {
       "Type": "Task",
       "Resource": "arn:aws:states:::emr-serverless:startApplication.sync",
       "Parameters": {
-        "ApplicationId.$": "$.ApplicationId"
+        "ApplicationId.$": "$.Application.ApplicationId"
       },
       "Next": "Run job",
       "ResultPath": null,
@@ -79,12 +81,12 @@
       "Type": "Task",
       "Resource": "arn:aws:states:::emr-serverless:startJobRun.sync",
       "Parameters": {
-        "ApplicationId.$": "$.ApplicationId",
+        "ApplicationId.$": "$.Application.ApplicationId",
         "ExecutionRoleArn": "${EMRServerlessJobExecutionRole}",
         "JobDriver": {
           "SparkSubmit": {
             "EntryPoint": "s3://${EMRAssetsS3BucketName}/code/pyspark/spark-job-emr.py",
-            "EntryPointArguments": [],
+            "EntryPointArguments.$": "States.Array($.mapResult[0].batch_id)",
             "SparkSubmitParameters": "--conf spark.hadoop.hive.metastore.client.factory.class=com.amazonaws.glue.catalog.metastore.AWSGlueDataCatalogHiveClientFactory"
           }
         }
@@ -105,7 +107,7 @@
       "Type": "Task",
       "Resource": "arn:aws:states:::emr-serverless:stopApplication.sync",
       "Parameters": {
-        "ApplicationId.$": "$.ApplicationId"
+        "ApplicationId.$": "$.Application.ApplicationId"
       },
       "End": true
     }

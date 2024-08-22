@@ -1,4 +1,6 @@
 import re
+from urllib.parse import urlparse, parse_qs
+
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.webdriver import WebDriver
 from datetime import datetime, timedelta
@@ -9,7 +11,7 @@ from selenium.webdriver.support.wait import WebDriverWait
 
 def main(event, context, driver: WebDriver):
     # from lambda event
-    duration = event.get('duration', 6)
+    duration = event.get('duration', 12)
     path = f"https://www.bobaedream.co.kr/list.php?code=national&pagescale=70&page=1"
     driver.get(path)
     WebDriverWait(driver, 2).until(expected_conditions.element_to_be_clickable(
@@ -24,7 +26,6 @@ def main(event, context, driver: WebDriver):
     posts_parsed, comments_parsed = [], []
     current_time = datetime.now()
     while True:
-        WebDriverWait(driver, 2).until(expected_conditions.presence_of_element_located((By.CLASS_NAME, "countGroup")))
         created_at = extract_created_at(driver)
         if not current_time - timedelta(hours=duration) <= created_at:
             break
@@ -34,7 +35,6 @@ def main(event, context, driver: WebDriver):
             comments_parsed.extend(comments_data)
         next_button = driver.find_element(By.CLASS_NAME, "topBtnGroup").find_element(By.XPATH, "//a[text()='다음글']")
         next_button.click()
-        WebDriverWait(driver, 2).until(expected_conditions.staleness_of(next_button))
     driver.quit()
     return {
         "posts": posts_parsed,
@@ -99,7 +99,11 @@ def post_crawling(driver):
         content += p.text
 
     likes = driver.find_element(By.ID, "tempPublic").text
-    id = url.split('=')[-1]
+    # URL을 파싱합니다
+    parsed_url = urlparse(url)
+    # 쿼리 문자열에서 파라미터를 추출합니다
+    parameters = parse_qs(parsed_url.query)
+    id = parameters['No'][0]
     author = driver.find_element(By.CLASS_NAME, 'nickName').text
     views = driver.find_element(By.XPATH,
                                 '/html/body/div[1]/div[6]/div/div/div[1]/div[3]/div[1]/div[1]/dl/dt/span/em[1]').text
