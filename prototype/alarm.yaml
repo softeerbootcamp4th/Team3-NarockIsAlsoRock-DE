@@ -11,13 +11,13 @@ Resources:
       CodeUri: ./alarm
       Timeout: 180
       MemorySize: 128
-      VpcConfig:
-        SubnetIds:
-          - !ImportValue RedshiftPublicSubnet1Id
-          - !ImportValue RedshiftPublicSubnet2Id
-          - !ImportValue RedshiftPublicSubnet3Id
-        SecurityGroupIds:
-          - !ImportValue SecurityGroupId
+#      VpcConfig:
+#        SubnetIds:
+#          - !ImportValue RedshiftPublicSubnet1Id
+#          - !ImportValue RedshiftPublicSubnet2Id
+#          - !ImportValue RedshiftPublicSubnet3Id
+#        SecurityGroupIds:
+#          - !ImportValue SecurityGroupId
       Environment:
         Variables:
           SLACK_WEBHOOK_PATH: "/services/T070MKQ7CJY/B07G10BC7U3/nRkzmVy5QIxTxwgWvc1R6i4x"
