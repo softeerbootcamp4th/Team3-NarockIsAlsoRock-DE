@@ -94,6 +94,7 @@ Resources:
                   - "lambda:InvokeFunction"
                 Resource:
                   - !ImportValue ExtractFunctionArn
+                  - !ImportValue SlackAlertFunctionArn
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/AmazonS3FullAccess
 
