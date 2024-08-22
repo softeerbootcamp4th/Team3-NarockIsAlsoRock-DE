@@ -19,8 +19,6 @@ def find_hot_criteria(row, model_df):
     condition = ((model_df['post_type'] == 1) \
                  & (model_df['relative_time'] == row.relatvie_time) \
                  & (model_df['cumulative_num'] == row.comments))
-    # print(row.relatvie_time)
-    # print(row.comments)
     hot_pdf_value = model_df[condition].pdf.values[0]
     return hot_pdf_value
 
@@ -29,8 +27,6 @@ def find_cold_criteria(row, model_df):
     condition = ((model_df['post_type'] == 0) \
                  & (model_df['relative_time'] == row.relatvie_time) \
                  & (model_df['cumulative_num'] == row.comments))
-    # print(row.relatvie_time)
-    # print(row.comments)
     hot_pdf_value = model_df[condition].pdf.values[0]
     return hot_pdf_value
 
@@ -39,7 +35,7 @@ def predict_post_type(post_df, model_df):
     per_post_hot_probability = post_df.apply(lambda x: find_hot_criteria(x, model_df), axis=1)
     per_post_cold_probability = post_df.apply(lambda x: find_cold_criteria(x, model_df), axis=1)
     post_df['impact'] = np.log(per_post_hot_probability / per_post_cold_probability).round(2)
-    post_df['impact'] = post_df['impact'].replace(np.inf, 554.93) # set upper bound of impact 
+    post_df['impact'] = post_df['impact'].replace(np.inf, 554.93)  # set upper bound of impact
     post_df['post_type'] = 0
     post_df.loc[post_df['impact'] > 0, 'post_type'] = 1
     return post_df
@@ -60,6 +56,7 @@ def get_db_credentials():
     )
     secret = json.loads(get_secret_value_response['SecretString'])
     return secret['redshift_user'], secret['redshift_password']
+
 
 def read_redshift(spark: SparkSession, dbtable, db_user, db_password, query=None):
     sql_context = SQLContext(spark.sparkContext)
@@ -93,14 +90,15 @@ def read_redshift(spark: SparkSession, dbtable, db_user, db_password, query=None
 def write_redshift(df: DataFrame, dbtable, db_user, db_password):
     url = "jdbc:redshift://de3-workgroup.181252290322.ap-northeast-2.redshift-serverless.amazonaws.com:5439/dev?user=" + db_user + "&password=" + db_password
     # Save results
-    if dbtable=="view":
+    if dbtable == "view":
         (df.write
          .format("io.github.spark_redshift_community.spark.redshift")
          .option("url", url)
          .option("dbtable", dbtable)
          .option("tempdir", f"s3://spark-transient-emr-lambda-ap-northeast-2-181252290322/temp/data/{dbtable}")
          .option("tempformat", "CSV")
-         .option("aws_iam_role","arn:aws:iam::181252290322:role/de3-team-project-Load-9ODBABB6O-RedshiftDefaultRole-JDX7MjpYhApU")
+         .option("aws_iam_role",
+                 "arn:aws:iam::181252290322:role/de3-team-project-Load-9ODBABB6O-RedshiftDefaultRole-JDX7MjpYhApU")
          .mode("overwrite")
          .save())
 
@@ -111,10 +109,16 @@ def write_redshift(df: DataFrame, dbtable, db_user, db_password):
          .option("dbtable", dbtable)
          .option("tempdir", f"s3://spark-transient-emr-lambda-ap-northeast-2-181252290322/temp/data/{dbtable}")
          .option("tempformat", "CSV")
-         .option("aws_iam_role","arn:aws:iam::181252290322:role/de3-team-project-Load-9ODBABB6O-RedshiftDefaultRole-JDX7MjpYhApU")
+         .option("aws_iam_role",
+                 "arn:aws:iam::181252290322:role/de3-team-project-Load-9ODBABB6O-RedshiftDefaultRole-JDX7MjpYhApU")
          .mode("append")
          .save())
     return
+
+
+def remove_commna(val):
+    return val.replace(",", "")
+
 
 if __name__ == "__main__":
     batch_id = sys.argv[1]
@@ -130,19 +134,19 @@ if __name__ == "__main__":
         .getOrCreate()
 
     post_df = (spark.read
-            .option("header", True)
-            .option("quote", "\"")
-            .option("escape", "\"")
-            .option("multiline", "true")
-            .option("sep", ",")
-            .csv(POST_FP, sep=',')
-            .to_pandas_on_spark())
+               .option("header", True)
+               .option("quote", "\"")
+               .option("escape", "\"")
+               .option("multiline", "true")
+               .option("sep", ",")
+               .csv(POST_FP, sep=',')
+               .to_pandas_on_spark())
     comment_df = (spark.read
-                .option("header", True)
-                .option("quote", "\"")
-                .option("multiline", "true")
-                .csv(COMMENT_FP, sep=',')
-                .to_pandas_on_spark())
+                  .option("header", True)
+                  .option("quote", "\"")
+                  .option("multiline", "true")
+                  .csv(COMMENT_FP, sep=',')
+                  .to_pandas_on_spark())
 
     db_user, db_password = get_db_credentials()
     model_df = read_redshift(spark, "model", db_user, db_password)
@@ -152,7 +156,6 @@ if __name__ == "__main__":
     comment_df['cmt_created_at'] = comment_df['cmt_created_at'].apply(parse_date)
     model_df['pdf'] = model_df['pdf'].astype(float)
     model_df['cumulative_num'] = model_df['cumulative_num'].astype(int)
-
 
     model_df['post_type'] = model_df['post_type'].astype(int)
 
@@ -173,31 +176,30 @@ if __name__ == "__main__":
     post_df = ps.merge(post_df, number_of_comment_per_post_df, left_on='id', right_on='post_id', how='left')
     post_df['comments'] = post_df['comments'].fillna(0)
 
-
-    post_df = post_df.drop(columns=['id', 'updated_at'])
+    post_df = post_df.drop(columns=['id', 'updated_at', 'content'])
     post_df['relatvie_time'] = ((collected_at - post_df['created_at']) // TIME_INTERVAL) * 5
+    post_df = post_df[post_df['relatvie_time'] >= 0]
     post_df = predict_post_type(post_df, model_df)
     post_df['sns_id'] = 0  # TODO: use sns_id from input data. (to be deleted)
     post_df['collected_at'] = collected_at
     post_df['batch_id'] = int(batch_id)
-    post_df['likes'] = post_df['likes'].astype(int)
-    post_df['views'] = post_df['views'].astype(int)
+    post_df['likes'] = post_df['likes'].apply(remove_commna).astype(int)
+    post_df['views'] = post_df['views'].apply(remove_commna).astype(int)
 
+    # Save result
+    write_redshift(post_df.to_spark(), 'post', db_user, db_password)
 
-    # # Save result
-    # write_redshift(post_df.to_spark(), 'post', db_user, db_password)
-
-    # # Update view table
-    # query = """
-    # WITH ranked_posts AS (
-    #     SELECT *,
-    #         ROW_NUMBER() OVER (PARTITION BY post_id ORDER BY batch_id DESC) AS rn
-    #     FROM post
-    #     WHERE created_at >= DATEADD('month', -1, CURRENT_DATE)
-    # )
-    # SELECT *
-    # FROM ranked_posts
-    # WHERE rn = 1
-    # """
-    # view_df = read_redshift(spark, "post", db_user, db_password, query)
-    # write_redshift(view_df, 'view', db_user, db_password)
+    # Update view table
+    query = """
+    WITH ranked_posts AS (
+        SELECT *,
+            ROW_NUMBER() OVER (PARTITION BY post_id ORDER BY batch_id DESC) AS rn
+        FROM post
+        WHERE created_at >= DATEADD('month', -1, CURRENT_DATE)
+    )
+    SELECT *
+    FROM ranked_posts
+    WHERE rn = 1
+    """
+    view_df = read_redshift(spark, "post", db_user, db_password, query)
+    write_redshift(view_df.to_spark(), 'view', db_user, db_password)

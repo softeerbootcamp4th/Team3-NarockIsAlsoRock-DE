@@ -1,5 +1,6 @@
 import logging
 import os
+import urllib.parse
 from datetime import datetime
 from tempfile import mkdtemp
 from typing import Dict, List, Any
@@ -33,7 +34,7 @@ def lambda_handler(event, context):
         logger.error(f"error site={site}, time={current_time}")
         logger.error(str(e))
         region = os.environ['AWS_REGION']
-        log_group_name = context.log_group_name
+        log_group_name = urllib.parse.unquote(context.log_group_name)
         cloudwatch_url = f"https://{region}.console.aws.amazon.com/cloudwatch/home?region={region}#logsV2:log-groups/log-group/{log_group_name}"
         send_slack_message(f"error site={site}, time={current_time}, cloudwatch_url={cloudwatch_url}")
         raise e

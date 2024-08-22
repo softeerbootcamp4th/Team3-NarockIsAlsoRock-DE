@@ -8,8 +8,9 @@
       <excludeFolder url="file://$MODULE_DIR$/sam/venv" />
       <excludeFolder url="file://$MODULE_DIR$/prototype/1/venv" />
       <excludeFolder url="file://$MODULE_DIR$/prototype/lambda/venv" />
+      <excludeFolder url="file://$MODULE_DIR$/prototype/venv" />
     </content>
-    <orderEntry type="jdk" jdkName="Python 3.12 (softeer-team-project)" jdkType="Python SDK" />
+    <orderEntry type="jdk" jdkName="Python 3.12 (softeer-team-project) (2)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
   <component name="PyNamespacePackagesService">
