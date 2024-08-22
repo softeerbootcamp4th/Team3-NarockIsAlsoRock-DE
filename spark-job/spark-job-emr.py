@@ -68,35 +68,60 @@ def get_db_credentials():
     secret = json.loads(get_secret_value_response['SecretString'])
     return secret['redshift_user'], secret['redshift_password']
 
-def read_redshift(spark: SparkSession, dbtable, db_user, db_password):
+def read_redshift(spark: SparkSession, dbtable, db_user, db_password, query=None):
     sql_context = SQLContext(spark.sparkContext)
     url = "jdbc:redshift://de3-workgroup.181252290322.ap-northeast-2.redshift-serverless.amazonaws.com:5439/dev?user=" + db_user + "&password=" + db_password
     # Access to Redshift cluster using Spark
-    rows = sql_context.read \
-        .format("io.github.spark_redshift_community.spark.redshift") \
-        .option("url", url) \
-        .option("tempdir_region", "ap-northeast-2") \
-        .option("dbtable", dbtable) \
-        .option("tempdir", "s3://spark-transient-emr-lambda-ap-northeast-2-181252290322/temp/data") \
-        .option("aws_iam_role",
-                "arn:aws:iam::181252290322:role/de3-team-project-Load-9ODBABB6O-RedshiftDefaultRole-JDX7MjpYhApU") \
-        .load()
+    
+    if query is None:
+        rows = sql_context.read \
+            .format("io.github.spark_redshift_community.spark.redshift") \
+            .option("url", url) \
+            .option("tempdir_region", "ap-northeast-2") \
+            .option("dbtable", dbtable) \
+            .option("tempdir", f"s3://spark-transient-emr-lambda-ap-northeast-2-181252290322/temp/data/{dbtable}") \
+            .option("aws_iam_role",
+                    "arn:aws:iam::181252290322:role/de3-team-project-Load-9ODBABB6O-RedshiftDefaultRole-JDX7MjpYhApU") \
+            .load()
+    else:
+        rows = sql_context.read \
+            .format("io.github.spark_redshift_community.spark.redshift") \
+            .option("url", url) \
+            .option("tempdir_region", "ap-northeast-2") \
+            .option("tempdir", f"s3://spark-transient-emr-lambda-ap-northeast-2-181252290322/temp/data/{dbtable}") \
+            .option("aws_iam_role",
+                    "arn:aws:iam::181252290322:role/de3-team-project-Load-9ODBABB6O-RedshiftDefaultRole-JDX7MjpYhApU") \
+            .option("query", query) \
+            .load()
+
     return rows.to_pandas_on_spark()
 
 
-def save(df: DataFrame):
+def write_redshift(df: DataFrame, dbtable, db_user, db_password):
     url = "jdbc:redshift://de3-workgroup.181252290322.ap-northeast-2.redshift-serverless.amazonaws.com:5439/dev?user=" + db_user + "&password=" + db_password
     # Save results
-    (df.write
-     .format("io.github.spark_redshift_community.spark.redshift")
-     .option("url", url)
-     .option("dbtable", "post")
-     .option("tempdir", "s3://spark-transient-emr-lambda-ap-northeast-2-181252290322/temp/data")
-     .option("tempformat", "CSV")
-     .option("aws_iam_role","arn:aws:iam::181252290322:role/de3-team-project-Load-9ODBABB6O-RedshiftDefaultRole-JDX7MjpYhApU")
-     .mode("append")
-     .save())
-
+    if dbtable=="view":
+        (df.write
+         .format("io.github.spark_redshift_community.spark.redshift")
+         .option("url", url)
+         .option("dbtable", dbtable)
+         .option("tempdir", f"s3://spark-transient-emr-lambda-ap-northeast-2-181252290322/temp/data/{dbtable}")
+         .option("tempformat", "CSV")
+         .option("aws_iam_role","arn:aws:iam::181252290322:role/de3-team-project-Load-9ODBABB6O-RedshiftDefaultRole-JDX7MjpYhApU")
+         .mode("overwrite")
+         .save())
+        
+    else:
+        (df.write
+         .format("io.github.spark_redshift_community.spark.redshift")
+         .option("url", url)
+         .option("dbtable", dbtable)
+         .option("tempdir", f"s3://spark-transient-emr-lambda-ap-northeast-2-181252290322/temp/data/{dbtable}")
+         .option("tempformat", "CSV")
+         .option("aws_iam_role","arn:aws:iam::181252290322:role/de3-team-project-Load-9ODBABB6O-RedshiftDefaultRole-JDX7MjpYhApU")
+         .mode("append")
+         .save())
+    return 
 
 if __name__ == "__main__":
     spark = SparkSession.builder \
@@ -153,5 +178,21 @@ if __name__ == "__main__":
     post_df['batch_id'] = int(collected_at.strftime('%Y%m%d%H%M'))
     post_df['likes'] = post_df['likes'].astype(int)
     post_df['views'] = post_df['views'].astype(int)
+    
     # Save result
-    save(post_df.to_spark())
+    write_redshift(post_df.to_spark(), 'view', db_user, db_password)
+
+    # Update view table
+    query = """
+    WITH ranked_posts AS (
+        SELECT *,
+            ROW_NUMBER() OVER (PARTITION BY post_id ORDER BY batch_id DESC) AS rn
+        FROM post
+        WHERE created_at >= DATEADD('month', -1, CURRENT_DATE)
+    )
+    SELECT *
+    FROM ranked_posts
+    WHERE rn = 1
+    """
+    view_df = read_redshift(spark, "post", db_user, db_password, query)
+    write_redshift(view_df, 'view', db_user, db_password)
