@@ -42,6 +42,12 @@ AWS SAM은 AWS SecretManage에서 해당 값들을 동적으로 참조하여 데
 
 load/template.yaml, alarm/template.yaml에 보안 암호 경로가 설정되어있습니다.
 
+데이터를 처리할 pyspark job은 S3의 지정된 경로에 업로드하면 됩니다.
+
+경로는 다음과 같습니다.
+
+`s3://${EMRAssetsS3BucketName}/code/pyspark/spark-job-emr.py`
+
 # 배포
 
 SAM CLI는 Lambda 애플리케이션을 빌드하고 테스트할 수 있는 기능을 추가하는 AWS CLI의 확장 기능입니다.

@@ -14,7 +14,18 @@
           "ExtractStep": {
             "Type": "Task",
             "Resource": "${ExtractFunctionArn}",
-            "End": true
+            "End": true,
+            "Retry": [
+              {
+                "ErrorEquals": [
+                  "States.ALL"
+                ],
+                "BackoffRate": 2,
+                "IntervalSeconds": 1,
+                "MaxAttempts": 3,
+                "Comment": "retry extract on failure"
+              }
+            ]
           }
         }
       },
