@@ -1,103 +1,92 @@
+# 개요
 
-# Setting (Very important)
-You should set AWS Secrets Manager for setting redshift AdminUsername & AdminUserPassword
-set secret name and key
-Refer to this [page](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/dynamic-references.html)
+[AWS SAM(Serverless Application Model)](https://aws.amazon.com/ko/serverless/sam/)
+을 이용하여 데이터 파이프 인프라를 코드로 관리하고 배포했습니다.
 
-## Deploy the sample application
+AWS Step Function을 사용하여 전체적인 워크플로우를 관리했습니다.
 
-The Serverless Application Model Command Line Interface (SAM CLI) is an extension of the AWS CLI that adds functionality for building and testing Lambda applications. It uses Docker to run your functions in an Amazon Linux environment that matches Lambda. It can also emulate your application's build environment and API.
+최상위에 있는 template.yaml에 전체 구조가 정의되어 있고 하위 폴더들에 하위 스택들이 정의되어 있습니다.
 
-To use the SAM CLI, you need the following tools.
+alarm, extract, load, transform, workflow 폴더에 각 스텝에 필요한
+자원을 정의했습니다.
 
-* SAM CLI - [Install the SAM CLI](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-install.html)
+1. alarm에는 슬랙 알람을 보내는데 필요한 람다 함수를 정의했습니다.
+2. extract는 SNS에서 게시글을 스크래핑해 오는 람다 함수가 정의했습니다.
+3. load에는 정제된 데이터를 적재 할 수 있는 AWS Redshift를 정의했습니다.
+4. transform에는 SNS에서 스크래핑한 데이터를 처리 할 때 사용하는 AWS EMR이
+   필요로 하는 자원을 정의했습니다.
+5. workflow에는 전체 워크플로를 관리해주는 AWS Stepfunction이 정의되어있습니다.
+
+# 아키텍처
+
+![cloudformation.drawio.png](cloudformation.drawio.png)
+
+# 배포
+
+## 준비물
+
+1. AWS ScretManager에 AWS Redshift용 관리자 ID와 비밀번호
+2. 데이터를 처리 할 pyspark job
+3. Slack 수신 웹훅 URL
+
+AWS Redshift 관리자 ID와 비밀번호와 Slack 알람 수신 URL은 노출되면 안되기
+때문에 AWS Secretmanger를 통해 관리합니다.
+
+데이터 파이프 라인을 배포하기 전에 AWS Secretmanger에 ID,비밀번호, 슬랙 url을
+등록해야합니다.
+
+AWS SAM은 AWS SecretManage에서 해당 값들을 동적으로 참조하여 데이터 파이프 라인을 배포합니다.
+
+정확한 보안 암호 설정법은 [(링크)](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/dynamic-references.html)
+를 참고하면 됩니다..
+
+load/template.yaml, alarm/template.yaml에 보안 암호 경로가 설정되어있습니다.
+
+# 배포
+
+SAM CLI는 Lambda 애플리케이션을 빌드하고 테스트할 수 있는 기능을 추가하는 AWS CLI의 확장 기능입니다.
+
+SAM CLI는 Docker를 사용하여 Lambda와 일치하는 Amazon Linux 환경에서 함수를 실행합니다.
+또한 애플리케이션의 빌드 환경과 API를 에뮬레이트할 수도 있습니다.
+
+SAM CLI를 사용하려면 다음 도구들이 필요합니다.
+
+* SAM
+  CLI - [Install the SAM CLI](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-install.html)
 * [Python 3 installed](https://www.python.org/downloads/)
 * Docker - [Install Docker community edition](https://hub.docker.com/search/?type=edition&offering=community)
 
-To build and deploy your application for the first time, run the following in your shell:
+빌드와 배포를 위해서는 다음 명령어를 사용합니다.
 
 ```bash
 sam build --use-container
 sam deploy --guided
 ```
 
-The first command will build the source of your application. The second command will package and deploy your application to AWS, with a series of prompts:
+## SAM CLI를 사용하여 로컬에서 빌드하고 테스트하기
 
-* **Stack Name**: The name of the stack to deploy to CloudFormation. This should be unique to your account and region, and a good starting point would be something matching your project name.
-* **AWS Region**: The AWS region you want to deploy your app to.
-* **Confirm changes before deploy**: If set to yes, any change sets will be shown to you before execution for manual review. If set to no, the AWS SAM CLI will automatically deploy application changes.
-* **Allow SAM CLI IAM role creation**: Many AWS SAM templates, including this example, create AWS IAM roles required for the AWS Lambda function(s) included to access AWS services. By default, these are scoped down to minimum required permissions. To deploy an AWS CloudFormation stack which creates or modifies IAM roles, the `CAPABILITY_IAM` value for `capabilities` must be provided. If permission isn't provided through this prompt, to deploy this example you must explicitly pass `--capabilities CAPABILITY_IAM` to the `sam deploy` command.
-* **Save arguments to samconfig.toml**: If set to yes, your choices will be saved to a configuration file inside the project, so that in the future you can just re-run `sam deploy` without parameters to deploy changes to your application.
-
-You can find your API Gateway Endpoint URL in the output values displayed after deployment.
-
-## Use the SAM CLI to build and test locally
-
-Build your application with the `sam build --use-container` command.
+sam build --use-container 명령어를 사용하여 애플리케이션을 빌드합니다.
 
 ```bash
-transform$ sam build --use-container
+infra$ sam build --use-container
 ```
 
-The SAM CLI installs dependencies defined in `hello_world/requirements.txt`, creates a deployment package, and saves it in the `.aws-sam/build` folder.
+SAM CLI는 hello_world/requirements.txt에 정의된 종속성을 설치하고 배포 패키지를 생성하여 .aws-sam/build 폴더에 저장합니다.
 
-Test a single function by invoking it directly with a test event. An event is a JSON document that represents the input that the function receives from the event source. Test events are included in the `events` folder in this project.
+테스트 이벤트로 함수를 직접 호출하여 단일 함수를 테스트할 수 있습니다. 이벤트는 함수가 이벤트 소스로부터 받는 입력을 나타내는 JSON 문서입니다. 이 프로젝트의 events 폴더에 테스트 이벤트가 포함되어
+있습니다.
 
-Run functions locally and invoke them with the `sam local invoke` command.
+로컬에서 함수를 실행하고 sam local invoke 명령어로 호출합니다.
+
+아래 예제에서는 보배드림 사이트를 스크래핑하여 s3에 업로드하는 람다 함수를 테스트 할 수 있습니다.
 
 ```bash
-transform$ sam local invoke HelloWorldFunction --event events/event.json
+infra$ sam local invoke ExtractFunction --event extract/events/event.json
 ```
 
-The SAM CLI can also emulate your application's API. Use the `sam local start-api` to run the API locally on port 3000.
+## 정리
 
-```bash
-transform$ sam local start-api
-transform$ curl http://localhost:3000/
-```
-
-The SAM CLI reads the application template to determine the API's routes and the functions that they invoke. The `Events` property on each function's definition includes the route and method for each path.
-
-```yaml
-      Events:
-        HelloWorld:
-          Type: Api
-          Properties:
-            Path: /hello
-            Method: get
-```
-
-## Add a resource to your application
-The application template uses AWS Serverless Application Model (AWS SAM) to define application resources. AWS SAM is an extension of AWS CloudFormation with a simpler syntax for configuring common serverless application resources such as functions, triggers, and APIs. For resources not included in [the SAM specification](https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md), you can use standard [AWS CloudFormation](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-template-resource-type-ref.html) resource types.
-
-## Fetch, tail, and filter Lambda function logs
-
-To simplify troubleshooting, SAM CLI has a command called `sam logs`. `sam logs` lets you fetch logs generated by your deployed Lambda function from the command line. In addition to printing the logs on the terminal, this command has several nifty features to help you quickly find the bug.
-
-`NOTE`: This command works for all AWS Lambda functions; not just the ones you deploy using SAM.
-
-```bash
-transform$ sam logs -n HelloWorldFunction --stack-name "transform" --tail
-```
-
-You can find more information and examples about filtering Lambda function logs in the [SAM CLI Documentation](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-logging.html).
-
-## Tests
-
-Tests are defined in the `tests` folder in this project. Use PIP to install the test dependencies and run tests.
-
-```bash
-transform$ pip install -r tests/requirements.txt --user
-# unit test
-transform$ python -m pytest tests/unit -v
-# integration test, requiring deploying the stack first.
-# Create the env variable AWS_SAM_STACK_NAME with the name of the stack we are testing
-transform$ AWS_SAM_STACK_NAME="transform" python -m pytest tests/integration -v
-```
-
-## Cleanup
-
-To delete the sample application that you created, use the AWS CLI. Assuming you used your project name for the stack name, you can run the following:
+생성한 샘플 애플리케이션을 삭제하려면 AWS CLI를 사용합니다. 프로젝트 이름을 스택 이름으로 사용했다고 가정하고, 다음 명령어를 실행할 수 있습니다:
 
 ```bash
 sam delete --stack-name "de3-team-project"
@@ -105,6 +94,11 @@ sam delete --stack-name "de3-team-project"
 
 ## Resources
 
-See the [AWS SAM developer guide](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/what-is-sam.html) for an introduction to SAM specification, the SAM CLI, and serverless application concepts.
+리소스
+SAM 사양, SAM CLI 및 서버리스 애플리케이션 개념에 대한 소개는
+[AWS SAM 개발자 가이드](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/what-is-sam.html)
+를 참조하세요.
 
-Next, you can use AWS Serverless Application Repository to deploy ready to use Apps that go beyond hello world samples and learn how authors developed their applications: [AWS Serverless Application Repository main page](https://aws.amazon.com/serverless/serverlessrepo/)
+다음으로, AWS 서버리스 애플리케이션 리포지토리를 사용하여 hello world 샘플을 넘어서는 애플리케이션을 배포하고, 저자들이 애플리케이션을 개발한 방법을 배울 수 있습니다/
+
+[AWS 서버리스 애플리케이션 리포지토리 메인 페이지](https://aws.amazon.com/serverless/serverlessrepo/)
