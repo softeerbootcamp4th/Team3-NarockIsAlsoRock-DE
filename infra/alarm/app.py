@@ -24,4 +24,4 @@ def send_slack_message(message):
 
 
 def lambda_handler(event, context):
-    send_slack_message(f"https://prod-apnortheast-a.online.tableau.com/t/wnl101206515e9cf6/views/dashboard-view-table/1?:origin=card_share_link&:embed=n")
+    send_slack_message(f"https://prod-apnortheast-a.online.tableau.com/t/wnl101206515e9cf6/views/dashboard-view-table/sheet6?:origin=card_share_link&:embed=n")
