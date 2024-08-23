@@ -20,7 +20,7 @@ Resources:
 #          - !ImportValue SecurityGroupId
       Environment:
         Variables:
-          SLACK_WEBHOOK_PATH: "/services/T070MKQ7CJY/B07G10BC7U3/nRkzmVy5QIxTxwgWvc1R6i4x"
+          SLACK_WEBHOOK_PATH: '{{resolve:secretsmanager:de3_slack_webhook_url:SecretString:slack_web_hook_url}}'
       Policies:
         - AWSLambdaBasicExecutionRole
         - Version: "2012-10-17"

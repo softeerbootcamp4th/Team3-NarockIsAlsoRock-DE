@@ -10,11 +10,11 @@ manifest_hash = ""
 packagetype = "Zip"
 functions = ["Alarm/SlackAlertFunction"]
 
-[function_build_definitions.03894462-0078-4020-93dd-afbd5c3324ff]
+[function_build_definitions.c0093c1a-9045-4902-abd5-a4155bf5a615]
 packagetype = "Image"
 functions = ["Extract/ExtractFunction"]
 
-[function_build_definitions.03894462-0078-4020-93dd-afbd5c3324ff.metadata]
+[function_build_definitions.c0093c1a-9045-4902-abd5-a4155bf5a615.metadata]
 Dockerfile = "Dockerfile"
 DockerContext = "/Users/admin/PycharmProjects/softeer-team-project/infra/extract"
 DockerTag = "python3.12-v1"
