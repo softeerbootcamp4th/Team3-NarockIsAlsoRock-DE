@@ -1,6 +1,7 @@
 import re
 from urllib.parse import urlparse, parse_qs
 
+from selenium.common import TimeoutException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.webdriver import WebDriver
 from datetime import datetime, timedelta
@@ -26,13 +27,14 @@ def main(event, context, driver: WebDriver):
     posts_parsed, comments_parsed = [], []
     current_time = datetime.now()
     while True:
-        created_at = extract_created_at(driver)
-        if not current_time - timedelta(hours=duration) <= created_at:
-            break
-        posts_data, comments_data = post_crawling(driver)
-        if posts_data is not None:
-            posts_parsed.append(posts_data)
-            comments_parsed.extend(comments_data)
+        if is_post_exist(driver):
+            created_at = extract_created_at(driver)
+            if not current_time - timedelta(hours=duration) <= created_at:
+                break
+            posts_data, comments_data = post_crawling(driver)
+            if posts_data is not None:
+                posts_parsed.append(posts_data)
+                comments_parsed.extend(comments_data)
         next_button = driver.find_element(By.CLASS_NAME, "topBtnGroup").find_element(By.XPATH, "//a[text()='다음글']")
         next_button.click()
     driver.quit()
@@ -40,6 +42,14 @@ def main(event, context, driver: WebDriver):
         "posts": posts_parsed,
         "comments": comments_parsed
     }
+
+
+def is_post_exist(driver):
+    try:
+        driver.find_element(By.CLASS_NAME, "countGroup")
+        return True
+    except TimeoutException:
+        return False
 
 
 def extract_created_at(driver):
@@ -55,9 +65,9 @@ def extract_created_at(driver):
     return created_at
 
 
+
 def cmt_crawling(driver, post_id):
     try:
-        WebDriverWait(driver, 2).until(expected_conditions.presence_of_element_located((By.ID, 'cmt_reply')))
         basiclist = driver.find_element(By.ID, 'cmt_reply')
     except:
         # 댓글이 없는 경우임
