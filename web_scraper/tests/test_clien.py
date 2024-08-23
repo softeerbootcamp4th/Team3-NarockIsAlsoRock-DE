@@ -1,5 +1,5 @@
 from selenium import webdriver
-from aws_lambda.sites import clien
+from web_scraper.src.sites import clien
 
 if __name__ == '__main__':
     for event in [{

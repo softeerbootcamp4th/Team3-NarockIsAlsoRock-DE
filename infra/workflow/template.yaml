@@ -4,10 +4,10 @@ Description:
   This template deploys Statemachine
 
 Resources:
-  StateMachine:
+  Workflow:
     Type: AWS::Serverless::StateMachine # More info about State Machine Resource: https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-resource-statemachine.html
     Properties:
-      DefinitionUri: statemachine/statemachine.asl.json
+      DefinitionUri: ./statemachine.asl.json
       DefinitionSubstitutions:
         ExtractFunctionArn: !ImportValue ExtractFunctionArn
         EMRAssetsS3BucketName: !ImportValue EMRAssetsS3BucketName

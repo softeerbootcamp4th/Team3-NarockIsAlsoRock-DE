@@ -9,8 +9,8 @@ import pandas as pd
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 
-from aws_lambda.local.utils import saveCookies, save_csv, setup_headless_driver
-from aws_lambda.sites import naver_cafe
+from web_scraper.local.utils import saveCookies, save_csv, setup_headless_driver
+from web_scraper.src.sites import naver_cafe
 
 
 def driver_naver_login(driver, id, pw):

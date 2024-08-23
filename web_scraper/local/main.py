@@ -1,6 +1,6 @@
 from selenium import webdriver
-from aws_lambda.local.utils import save_csv
-from aws_lambda.sites import fmkorea
+from web_scraper.local.utils import save_csv
+from web_scraper.src.sites import fmkorea
 
 if __name__ == '__main__':
     payloads = [

@@ -33,7 +33,7 @@ Parameters:
   LocalIp:
     Type: String
     Description: Your local IP address in CIDR notation.
-    Default: 183.101.248.104/32
+    Default: 61.78.69.65/32
 
 Resources:
   VPC:

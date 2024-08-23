@@ -8,24 +8,28 @@ Resources:
   Extract:
     Type: AWS::Serverless::Application
     Properties:
-      Location: extract.yaml
+      Location: ./extract/template.yaml
+
   Transform:
     Type: AWS::Serverless::Application
     Properties:
-      Location: transform.yaml
+      Location: ./transform/template.yaml
     DependsOn: Extract
+
   Load:
     Type: AWS::Serverless::Application
     Properties:
-      Location: load.yaml
+      Location: ./load/template.yaml
     DependsOn: Transform
+
   Alarm:
     Type: AWS::Serverless::Application
     Properties:
-      Location: alarm.yaml
+      Location: ./alarm/template.yaml
     DependsOn: Load
-  StepFunction:
+
+  Workflow:
     Type: AWS::Serverless::Application
     Properties:
-      Location: statemachine.yaml
+      Location: ./workflow/template.yaml
     DependsOn: Alarm

@@ -8,7 +8,7 @@ Resources:
     Properties:
       Handler: app.lambda_handler
       Runtime: python3.12
-      CodeUri: ./alarm
+      CodeUri: ./
       Timeout: 180
       MemorySize: 128
 #      VpcConfig:
