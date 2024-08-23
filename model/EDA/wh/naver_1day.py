@@ -1,20 +1,9 @@
-import csv
-import json
 import multiprocessing
-import os
-import time
 import traceback
-
 import pandas as pd
-from selenium import webdriver
-from selenium.webdriver.common.by import By
-
 import csv
 import json
 import os
-from selenium import webdriver
-from selenium.webdriver.chrome.webdriver import WebDriver
-
 import re
 import time
 import urllib.parse
@@ -25,7 +14,8 @@ from selenium.webdriver.common.by import By
 from datetime import datetime
 from selenium.webdriver.support import expected_conditions
 from selenium.webdriver.support.wait import WebDriverWait
-
+from selenium import webdriver
+from dotenv import load_dotenv
 
 
 def main(event, context, driver: WebDriver):
@@ -88,19 +78,19 @@ def comments_crawling(driver, post_id):  # 게시물 하나의 댓글들에 대�
         return []
     comment_box = driver.find_elements(By.CLASS_NAME, 'comment_box')
     comments = parse_comment_box(comment_box, post_id)
-    try:# 댓글에 페이지가 있는지 확인하고, 파싱
+    try:  # 댓글에 페이지가 있는지 확인하고, 파싱
         pages = driver.find_element(By.CLASS_NAME, 'CommentBox').find_element(By.CLASS_NAME, 'ArticlePaginate')
         buttons = pages.find_elements(By.TAG_NAME, 'button')
         for index, button in enumerate(buttons[1:]):
             button.click()
             WebDriverWait(driver, 5).until(
-                expected_conditions.element_to_be_clickable(buttons[index-1])
+                expected_conditions.element_to_be_clickable(buttons[index - 1])
             )
             # 댓글의 다른 페이지 클릭후 변경될 때까지 대기
             WebDriverWait(driver, 10).until(expected_conditions.staleness_of(comment_box[0]))
             comment_box = driver.find_elements(By.CLASS_NAME, 'comment_box')
             comments.extend(parse_comment_box(comment_box, post_id))
-    except NoSuchElementException:# 댓글에 페이지가 없는 경우
+    except NoSuchElementException:  # 댓글에 페이지가 없는 경우
         pass
     return comments
 
@@ -293,9 +283,11 @@ def scrap(start_date, end_date, keyword, cookies):
 
 if __name__ == '__main__':
     driver = webdriver.Chrome()
-    id_ = 'hmg_de'
-    pw = 'hmg_de_hmg_de1'
-
+    # Load the .env file
+    load_dotenv()
+    # Access environment variables
+    id_ = os.getenv('NAVER_ID')
+    pw = os.getenv('NAVER_PASSWORD')
     driver = driver_naver_login(driver, id_, pw)
     saveCookies(driver)
     driver.quit()

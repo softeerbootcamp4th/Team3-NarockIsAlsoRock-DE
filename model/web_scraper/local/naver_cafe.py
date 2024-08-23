@@ -6,11 +6,12 @@ import time
 import traceback
 
 import pandas as pd
+from dotenv import load_dotenv
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 
-from web_scraper.local.utils import saveCookies, save_csv, setup_headless_driver
-from web_scraper.src.sites import naver_cafe
+from local.utils import saveCookies, setup_headless_driver, save_csv
+from src.sites import naver_cafe
 
 
 def driver_naver_login(driver, id, pw):
@@ -65,7 +66,7 @@ def scarp_date_range(cookies, end, keyword, start):
         try:
             payload['page'] = i
             print(f"start payload={payload}")
-            results = naver_cafe.main(payload, {}, setup_headless_driver())
+            results = naver_cafe.main(payload, {}, webdriver.Chrome())
             if len(results['posts']) == 0:
                 print(f"scrap done. site={payload['site']}, keyword={keyword}, page={i}")
                 break
@@ -80,8 +81,11 @@ def scarp_date_range(cookies, end, keyword, start):
 
 if __name__ == '__main__':
     driver = webdriver.Chrome()
-    id_ = 'hmg_de'
-    pw = 'hmg_de_hmg_de1'
+    # Load the .env file
+    load_dotenv()
+    # Access environment variables
+    id_ = os.getenv('NAVER_ID')
+    pw = os.getenv('NAVER_PASSWORD')
 
     driver = driver_naver_login(driver, id_, pw)
     saveCookies(driver)
