@@ -1,5 +1,6 @@
 from selenium import webdriver
-from web_scraper.src.sites import clien
+
+from src.sites import clien
 
 if __name__ == '__main__':
     for event in [{

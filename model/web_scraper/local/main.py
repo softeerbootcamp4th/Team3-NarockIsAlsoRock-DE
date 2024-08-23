@@ -1,6 +1,6 @@
 from selenium import webdriver
-from web_scraper.local.utils import save_csv
-from web_scraper.src.sites import fmkorea
+from local.utils import save_csv
+from src.sites import fmkorea
 
 if __name__ == '__main__':
     payloads = [

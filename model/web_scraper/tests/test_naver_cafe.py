@@ -7,8 +7,8 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions
 from selenium.webdriver.support.wait import WebDriverWait
 
-from web_scraper.local.naver_cafe import divide_by_6_month, driver_naver_login
-from web_scraper.src.sites.naver_cafe import comments_crawling
+from local.naver_cafe import divide_by_6_month, driver_naver_login
+from src.sites.naver_cafe import comments_crawling
 
 
 class Test(TestCase):
