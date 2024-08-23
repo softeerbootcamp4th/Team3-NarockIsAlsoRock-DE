@@ -23,7 +23,7 @@ Resources:
           Properties:
             Description: Schedule to run the state machine every hour
             Enabled: true
-            Schedule: rate(30 minutes)
+            Schedule: cron(1,31 * * * ? *)
             Input: '{"extractPayloads": [{"site": "bobae"}]}'
       Role: !GetAtt StateMachineExecutionRole.Arn
 
