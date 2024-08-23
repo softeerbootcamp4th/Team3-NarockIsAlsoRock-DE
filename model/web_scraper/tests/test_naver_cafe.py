@@ -1,5 +1,7 @@
+import os
 from unittest import TestCase
 
+from dotenv import load_dotenv
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions
@@ -24,8 +26,11 @@ class Test(TestCase):
     def test_crawl_multi_page_comment(self):
         url = "https://cafe.naver.com/ArticleRead.nhn?referrerAllArticles=true&page=1&searchBy=1&query=%5B%ED%98%84%EB%8C%80%EC%9E%90%EB%8F%99%EC%B0%A8%5D%20%EC%BD%94%EB%82%98%20EV%20%EB%A6%AC%EC%BD%9C%20%EA%B4%80%EB%A0%A8%20%EC%95%88%EB%82%B4&exclude=&include=&exact=&searchdate=all&media=0&sortBy=date&inCafeSearch=true&clubid=21771803&articleid=1165741"
         driver = webdriver.Chrome()
-        id_ = 'hmg_de'
-        pw = 'hmg_de_hmg_de1'
+        # Load the .env file
+        load_dotenv()
+        # Access environment variables
+        id_ = os.getenv('NAVER_ID')
+        pw = os.getenv('NAVER_PASSWORD')
 
         driver = driver_naver_login(driver, id_, pw)
         driver.get(url)

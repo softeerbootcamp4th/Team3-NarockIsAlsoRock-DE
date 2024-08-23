@@ -13,7 +13,9 @@ ps.set_option('compute.ops_on_diff_frames', True)
 
 MAX_COMMENTS_NUM = 200
 TIME_INTERVAL = 5 * 60  # seconds
-
+[
+    "SEND\ndestination:/app/game.sendGameData\ncontent-length:25\n\n{\"p\":1,\"t\":0,\"s\":0,\"l\":0}\u0000"
+]
 
 def find_hot_criteria(row, model_df):
     condition = ((model_df['post_type'] == 1) \
