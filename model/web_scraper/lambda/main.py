@@ -35,16 +35,16 @@ def lambda_handler(event, context):
 def scrap(context, event, site):
     result = {}
     if site == "clien":
-        from sites import clien
+        from src.sites import clien
         result = clien.main(event, context, setup_driver())
     elif site == "fmkorea":
-        from sites import fmkorea
+        from src.sites import fmkorea
         result = fmkorea.main(event, context, setup_driver())
     elif site == "naver_cafe":
-        from sites import naver_cafe
+        from src.sites import naver_cafe
         result = naver_cafe.main(event, context, setup_driver())
     elif site == "bobae":
-        from sites import bobae
+        from src.sites import bobae
         result = bobae.main(event, context, setup_driver())
     else:
         logger.error(f"site function not found {site}")
