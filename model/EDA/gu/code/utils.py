@@ -262,11 +262,12 @@ def get_target_val_by_percent(df, target, percent):
 
 
 def visualize_model(hot_df, cold_df, time_interval):
-    hot_model_interval_df = hot_df[hot_df['relative_time']<=time_interval].groupby('id').agg(['count'])
+    index = time_interval//5
+    hot_model_interval_df = hot_df[hot_df['relative_time']<=index].groupby('id').agg(['count'])
     hot_model_interval_df.columns = hot_model_interval_df.columns.droplevel(0)
     hot_model_interval_df.columns = ['count']
 
-    cold_model_interval_df = cold_df[cold_df['relative_time']<=time_interval].groupby('id').agg(['count'])
+    cold_model_interval_df = cold_df[cold_df['relative_time']<=index].groupby('id').agg(['count'])
     cold_model_interval_df.columns = cold_model_interval_df.columns.droplevel(0)
     cold_model_interval_df.columns = ['count']
 
@@ -282,6 +283,6 @@ def visualize_model(hot_df, cold_df, time_interval):
 
     plt.plot(x_values, cold_pdf_values, color='blue', label='cold post')
     plt.plot(x_values, hot_pdf_values, color='red', label='hot post')
-    plt.title(f"PDF of cumulative number of comments. Time ({time_interval*5}~{(time_interval+1)*5 -1} minutes)")
+    plt.title(f"PDF of cumulative number of comments. Time ({time_interval}~{time_interval+4} minutes)")
     plt.legend()
     plt.show()
