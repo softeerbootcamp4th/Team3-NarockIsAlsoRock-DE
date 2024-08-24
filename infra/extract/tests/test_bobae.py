@@ -1,9 +1,13 @@
+import os
+import time
+from datetime import datetime, timedelta
 from unittest import TestCase
 from urllib.parse import urlparse, parse_qs
 
+from pandas import read_html
 from selenium import webdriver
 
-from extract.sites.bobae import parse_post, click_latest_post, get_post_id
+from extract.sites.bobae import parse_post, click_latest_post, get_post_id, should_stop
 
 
 class Test(TestCase):
@@ -38,4 +42,11 @@ class Test(TestCase):
         id = get_post_id(self.post_url)
         self.assertEqual(id, self.post['id'], "The post id does not match")
 
+    def test_should_stop_true(self):
+        self.assertTrue(should_stop(datetime.now() - timedelta(hours=5), datetime.now(), 3))
 
+    def test_should_stop_fail(self):
+        self.assertFalse(should_stop(datetime.now() - timedelta(hours=1), datetime.now(), 3))
+
+    def test_should_stop_edge(self):
+        self.assertFalse(should_stop(datetime.now(), datetime.now() - timedelta(hours=3), 3))
