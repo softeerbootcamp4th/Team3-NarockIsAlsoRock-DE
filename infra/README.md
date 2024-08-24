@@ -1,5 +1,7 @@
 # 개요
 
+소프티어 데이터 엔지니어 3조 팀 프로젝트에서 개발한 데이터 파이프 라인을 배포 해 볼 수 있습니다..
+
 [AWS SAM(Serverless Application Model)](https://aws.amazon.com/ko/serverless/sam/)
 을 이용하여 데이터 파이프 인프라를 코드로 관리하고 배포했습니다.
 
@@ -20,6 +22,7 @@ alarm, extract, load, transform, workflow 폴더에 각 스텝에 필요한
 # 아키텍처
 
 ![cloudformation.drawio.png](cloudformation.drawio.png)
+라우팅 테이블과 AWS SecretManager VPC Endpoint는 생략
 
 # 배포
 
@@ -42,9 +45,7 @@ AWS SAM은 AWS SecretManage에서 해당 값들을 동적으로 참조하여 데
 
 load/template.yaml, alarm/template.yaml에 보안 암호 경로가 설정되어있습니다.
 
-데이터를 처리할 pyspark job은 S3의 지정된 경로에 업로드하면 됩니다.
-
-경로는 다음과 같습니다.
+데이터를 처리할 pyspark job은 S3의 다음 경로에 업로드하면 됩니다.
 
 `s3://${EMRAssetsS3BucketName}/code/pyspark/spark-job-emr.py`
 

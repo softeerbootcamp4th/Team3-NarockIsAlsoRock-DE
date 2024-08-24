@@ -1,9 +1,5 @@
-*
-*/.*
-*.csv
 */__pycache__
 *.pyc
-6:09
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -147,8 +143,3 @@ vscode/
 ._untracked
 **/untracked
 **/._untracked
-*
-*/.*
-*.csv
-*/__pycache__
-*.pyc

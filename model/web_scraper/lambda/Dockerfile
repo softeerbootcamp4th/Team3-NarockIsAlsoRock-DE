@@ -13,6 +13,6 @@ RUN rm ./chrome-installer.sh
 RUN pip install selenium beautifulsoup4
 # Copy the main application code
 COPY main.py ./
-COPY ./sites/ ./sites/
+COPY ../src/sites/ ./sites/
 # Command to run the Lambda function
 CMD [ "main.lambda_handler" ]
