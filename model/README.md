@@ -1,4 +1,10 @@
 # Model
+## 폴더 구조
+- [model/EDA](https://github.com/softeerbootcamp4th/DE3-team-project/tree/main/model/EDA): 팀원들의 EDA 결과를 포함한다.
+- [model/resources](https://github.com/softeerbootcamp4th/DE3-team-project/tree/main/model/EDA): web_scrapper를 통해 얻은 데이터들을 포함한다.
+- [model/spark-job](https://github.com/softeerbootcamp4th/DE3-team-project/tree/main/model/EDA): 실제 transform 과정 중 Serverless EMR에서 사용하는 코드를 포함한다.
+- [model/web_scrapper](https://github.com/softeerbootcamp4th/DE3-team-project/tree/main/model/EDA): 웹 스크래핑을 위한 코드를 포함한다.
+
 ## EDA
 - EDA 결과 정리 - ([범규](https://github.com/nothingmin/softeer-team-project/tree/main/model/EDA/bg), [구](https://github.com/nothingmin/softeer-team-project/tree/main/model/EDA/gu), [우형](https://github.com/nothingmin/softeer-team-project/tree/main/model/EDA/wh))
 - EDA 결과를 바탕으로, 시간의 흐름에 따른 게시물의 댓글 수 변화에 기반한 화제성 평가 지표를 정의하였다.
