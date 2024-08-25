@@ -286,3 +286,29 @@ def visualize_model(hot_df, cold_df, time_interval):
     plt.title(f"PDF of cumulative number of comments. Time ({time_interval}~{time_interval+4} minutes)")
     plt.legend()
     plt.show()
+    
+def visualize_impact(hot_df ,cold_df, time_interval):
+    index = time_interval//5
+    hot_model_interval_df = hot_df[hot_df['relative_time']<=index].groupby('id').agg(['count'])
+    hot_model_interval_df.columns = hot_model_interval_df.columns.droplevel(0)
+    hot_model_interval_df.columns = ['count']
+
+    cold_model_interval_df = cold_df[cold_df['relative_time']<=index].groupby('id').agg(['count'])
+    cold_model_interval_df.columns = cold_model_interval_df.columns.droplevel(0)
+    cold_model_interval_df.columns = ['count']
+
+    x_values = np.linspace(0, 201, 200)
+
+    mean_hot = hot_model_interval_df['count'].mean()
+    std_hot = hot_model_interval_df['count'].std()
+    hot_pdf_values = stats.norm.pdf(x_values, mean_hot, std_hot)
+
+    mean_cold = cold_model_interval_df['count'].mean()
+    std_cold = cold_model_interval_df['count'].std()
+    cold_pdf_values = stats.norm.pdf(x_values, mean_cold, std_cold)
+
+    impact = np.log(hot_pdf_values/cold_pdf_values)
+    plt.plot(x_values, impact, color='red', label='impact')
+    plt.title(f"PDF of cumulative number of comments. Time ({time_interval}~{time_interval+4} minutes)")
+    plt.legend()
+    plt.show()

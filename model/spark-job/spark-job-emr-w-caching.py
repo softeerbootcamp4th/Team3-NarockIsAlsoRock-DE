@@ -7,10 +7,12 @@ from pyspark import SparkConf, SQLContext
 from pyspark.sql import SparkSession, Row
 from pyspark.sql.dataframe import DataFrame
 from datetime import datetime
+
 ps.set_option('compute.ops_on_diff_frames', True)
 
 MAX_COMMENTS_NUM = 200
 TIME_INTERVAL = 5 * 60  # seconds
+
 
 def find_hot_criteria(row, model_df):
     condition = ((model_df['post_type'] == 1) \
@@ -81,22 +83,22 @@ def read_redshift(spark: SparkSession, dbtable, db_user, db_password, query=None
             .option("query", query) \
             .load()
 
-    return rows.to_pandas_on_spark()
+    return rows.pandas_api()
 
 
 def write_redshift(df: DataFrame, dbtable, db_user, db_password):
     url = "jdbc:redshift://de3-workgroup.181252290322.ap-northeast-2.redshift-serverless.amazonaws.com:5439/dev?user=" + db_user + "&password=" + db_password
     # Save results
     (df.write
-        .format("io.github.spark_redshift_community.spark.redshift")
-        .option("url", url)
-        .option("dbtable", dbtable)
-        .option("tempdir", f"s3://spark-transient-emr-lambda-ap-northeast-2-181252290322/temp/data/{dbtable}")
-        .option("tempformat", "CSV")
-        .option("aws_iam_role",
-                "arn:aws:iam::181252290322:role/de3-team-project-Load-9ODBABB6O-RedshiftDefaultRole-JDX7MjpYhApU")
-        .mode("append")
-        .save())
+     .format("io.github.spark_redshift_community.spark.redshift")
+     .option("url", url)
+     .option("dbtable", dbtable)
+     .option("tempdir", f"s3://spark-transient-emr-lambda-ap-northeast-2-181252290322/temp/data/{dbtable}")
+     .option("tempformat", "CSV")
+     .option("aws_iam_role",
+             "arn:aws:iam::181252290322:role/de3-team-project-Load-9ODBABB6O-RedshiftDefaultRole-JDX7MjpYhApU")
+     .mode("append")
+     .save())
     return
 
 
@@ -141,6 +143,7 @@ if __name__ == "__main__":
     model_df['cumulative_num'] = model_df['cumulative_num'].astype(int)
     model_df['post_type'] = model_df['post_type'].astype(int)
 
+    model_df = model_df.spark.cache()
     # get number of comments per post
     number_of_comment_per_post_df = comment_df[['post_id', 'cmt_author']].groupby(['post_id']).agg(
         {'cmt_author': 'count'}).rename(columns={'cmt_author': 'comments'})
@@ -149,11 +152,14 @@ if __name__ == "__main__":
 
     # Add columns to classify the type of post.
     post_df = ps.merge(post_df, number_of_comment_per_post_df, left_on='id', right_on='post_id', how='left')
-    
-    post_df['comments'] = post_df['comments'].fillna(0)
     post_df = post_df.drop(columns=['id', 'updated_at', 'content'])
+
+    post_df = post_df.spark.cache()
+    post_df['comments'] = post_df['comments'].fillna(0)
     post_df['relative_time'] = ((collected_at - post_df['created_at']) // TIME_INTERVAL) * 5
     post_df = post_df[post_df['relative_time'] >= 0]
+    post_df = post_df.spark.cache()
+
     post_df = predict_post_type(post_df, model_df)
     post_df['sns_id'] = 0  # TODO: use sns_id from input data. (to be deleted)
     post_df['collected_at'] = collected_at
