@@ -51,22 +51,21 @@
 댓글 수와 좋아요, 조회수는 상당한 상관 관계가 있음을 확인할 수 있었습니다.
 
 ### 댓글이 많은 게시글과 적은 게시글의 게시글 변화 추이 
+---
+댓글이 많은 게시글과, 댓글이 적은 게시글의 댓글수 증가 정도가 다릅니다.
 ![less_comment_change](https://github.com/user-attachments/assets/2c57b006-58ae-4fd4-a0ab-92f4b3c9d187)
 ![many_comment_change](https://github.com/user-attachments/assets/a9dd9792-4910-497f-97ae-771ef26a1b0d)
 
-댓글이 많은 게시글과, 댓글이 적은 게시글의 댓글수 증가 정도가 다릅니다.
 ---
+시간에 다른 댓글수별 게시글 수 히스토그램입니다.
+댓글이 많은 게시글과 댓글이 적은 게시글의 히스토그램은 그 집단의 절대적인 양이 차이가 많으며 집단별로 분포 형태가 상이합니다.
 ![cold_hist](https://github.com/user-attachments/assets/1d585a43-790d-4754-a7fc-645ca0072643)
 ![hot_hist](https://github.com/user-attachments/assets/36c98af1-d22e-401f-bccb-4ab21dedc8d7)
-
-시간에 다른 댓글수별 게시글 수 히스토그램입니다.
-댓글이 많은 게시글과 댓글이 적은 게시글의 히스토그램은 그 집단의 절대적인 양이 차이가 많이 각 집단별로 특징이 있어보입니다.
 ---
-![pdf_cold](https://github.com/user-attachments/assets/c7091bdc-e615-4e9b-adfb-72d3fd76845b)
-![pdf_hot](https://github.com/user-attachments/assets/640fb627-c672-4471-9647-658142e6cdc4)
 
 게시글의 분포를 정규화 하여 PDF로 나타낸 결과, 댓글수가 많은 게시글들이 평균이 높고 분산이 더 컸습니다.
-
+![pdf_cold](https://github.com/user-attachments/assets/c7091bdc-e615-4e9b-adfb-72d3fd76845b)
+![pdf_hot](https://github.com/user-attachments/assets/640fb627-c672-4471-9647-658142e6cdc4)
 
 ### 검증
 pdf_hot과 pdf_cold의 비율로 어떤 집단에 더 가까운지 평가합니다.
