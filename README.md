@@ -15,6 +15,8 @@
 **위의 링크를 따라가면 폴더 별로 자세히 설명된 README가 작성되어 있습니다.**
 
 ## 아키텍처
-
 ![cloudformation.drawio.png](/infra/cloudformation.drawio.png)
 라우팅 테이블과 AWS SecretManager VPC Endpoint는 생략
+
+## 대시보드
+![dashboraddemo-ezgif com-video-to-gif-converter (1)](https://github.com/user-attachments/assets/e5008781-37d6-4263-b414-d9828b1512e5)
