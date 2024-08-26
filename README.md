@@ -12,7 +12,7 @@
 - [model/](https://github.com/softeerbootcamp4th/DE3-team-project/tree/main/infra): 알람을 받을 기준이 되는 모델을 개발하는 과정과 결과를 정리해 놓은 폴더
 - [infra/](https://github.com/softeerbootcamp4th/DE3-team-project/tree/main/model): 데이터 파이프라인 인프라를 코드로 정의한 파일들이 포함된 폴더.
 
-**자세한 설명은 폴더 별로 README가 작성되어 있습니다.**
+**위의 링크를 따라가면 폴더 별로 자세히 설명된 README가 작성되어 있습니다.**
 
 ## 아키텍처
 
