@@ -11,7 +11,7 @@
     4. 모든 정보를 Redshift(post table)에 적재한다. 
 
 ## Simple Diagram
-<img width="1002" alt="image" src="https://github.com/user-attachments/assets/000bde3e-0bd7-445b-8d5d-5956e0489b4b">
+<img width="1138" alt="image" src="https://github.com/user-attachments/assets/7a58f05a-91e9-4423-be6c-295629ee0659">
 
 ## Optimization
 - 적절한 caching과 broadcast join을 수행하도록 하기 위한 [hint](https://spark.apache.org/docs/latest/api/python/reference/pyspark.pandas/api/pyspark.pandas.DataFrame.spark.hint.html)를 제공하여 transform 과정이 효율적으로 진행될 수 있도록 하였다.
