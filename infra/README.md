@@ -49,7 +49,7 @@ load/template.yaml, alarm/template.yaml에 보안 암호 경로가 설정되어�
 
 `s3://${EMRAssetsS3BucketName}/code/pyspark/spark-job-emr.py`
 
-# 배포
+## 배포
 
 SAM CLI는 Lambda 애플리케이션을 빌드하고 테스트할 수 있는 기능을 추가하는 AWS CLI의 확장 기능입니다.
 
