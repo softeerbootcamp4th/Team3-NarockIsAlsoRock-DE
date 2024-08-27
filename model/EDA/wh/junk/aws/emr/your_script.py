@@ -9,11 +9,11 @@ spark = SparkSession.builder \
     .getOrCreate()
 
 # 2. S3에서 CSV 파일 로드
-csv_file_path = "s3://wh-src-bucket-test/naver_cafe_posts.csv"
+csv_file_path = ""
 df = spark.read.csv(csv_file_path, header=True, inferSchema=True)
 
 # 3. DataFrame을 Parquet 형식으로 변환
-parquet_file_path = "s3://wh-dest-bucket-test/naver_cafe_posts.parquet"
+parquet_file_path = ""
 df.write.parquet(parquet_file_path, mode="overwrite")
 
 # 4. Spark 세션 종료
