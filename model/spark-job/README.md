@@ -21,3 +21,6 @@
 
 - After Optimization
 <img width="1728" alt="after-optimization" src="https://github.com/user-attachments/assets/87ce32a4-6492-43ac-9d8e-386dcc3c2c05">
+
+- Without Pandas API
+- <img width="1728" alt="without-pandas-api" src="https://github.com/user-attachments/assets/5a67bb58-de93-426a-9bce-7c0907896a22">
